@@ -167,10 +167,13 @@ async function supabaseQuery(table, select, opts) {
 }
 
 // 将 Supabase 时间字符串转为北京时间显示
-// Supabase 存的是 UTC+0 的 ISO 格式字符串（如 "2026-06-11 09:30:00"），需要 +8 小时
+// Supabase 存的是 UTC+0 ISO 格式（如 "2026-06-11T08:13:48+00:00" 或 "2026-06-11 09:30:00"）
 function toBeijingTime(timeStr) {
   if (!timeStr) return '';
-  const d = new Date(timeStr.replace(' ', 'T') + '+00:00');
+  // 兼容两种格式：带时区的 ISO 和旧版空格分隔格式
+  const normalized = timeStr.replace(' ', 'T');
+  const d = new Date(normalized.includes('+') || normalized.includes('Z') ? normalized : normalized + '+00:00');
+  if (isNaN(d.getTime())) return timeStr; // 解析失败时返回原值
   const bj = new Date(d.getTime() + 8 * 3600000);
   return bj.toISOString().replace('T', ' ').slice(0, 19);
 }
