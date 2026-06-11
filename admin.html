@@ -298,6 +298,10 @@ function render(visits, divinations) {
   const sortByVal = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]);
   const maxOf = arr => arr.length ? arr[0][1] : 1;
 
+  // 暴露到全局作用域供 renderCompact 等外部函数使用
+  window._sortByVal = sortByVal;
+  window._maxOf = maxOf;
+
   let html = '';
 
   // ==================== 概览卡片（丰富版） ====================
@@ -591,7 +595,7 @@ function renderCompact(visits, divinations, ctx) {
   h += buildBarSection('💻 操作系统', ctx.oses, 200);
 
   const mNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
-  const topGua = sortByVal(ctx.guaCounts).slice(0, 8);
+  const topGua = window._sortByVal(ctx.guaCounts).slice(0, 8);
   if (topGua.length) {
     h += '<div class="section"><h2>🏆 热门卦象 TOP8</h2><table>';
     const maxG = topGua[0][1];
