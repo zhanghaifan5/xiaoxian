@@ -97,6 +97,13 @@
   .lock-box .lock-err { color:#c44; font-size:12px; margin-top:10px; min-height:18px; }
   .lock-hidden { display:none !important; }
 
+  /* 农历卡片 */
+  .lunar-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; text-align:center; transition:all .3s; grid-column:span 2; }
+  .lunar-card:hover { border-color:var(--bronze); }
+  .lunar-card .lunar-date { font-size:22px; color:var(--gold-light); font-weight:bold; }
+  .lunar-card .lunar-ganzhi { font-size:13px; color:var(--jade); margin-top:4px; }
+  .lunar-card .lunar-detail { font-size:11px; color:var(--text-dim); margin-top:2px; }
+
   /* 折线图 */
   .chart-wrap { position:relative; width:100%; }
   .chart-wrap canvas { width:100%; height:260px; display:block; }
@@ -220,6 +227,24 @@ function toggleMode() {
   refresh();
 }
 
+// 农历缓存
+let lunarCache = null;
+
+async function fetchLunar() {
+  if (lunarCache) return lunarCache;
+  try {
+    const resp = await fetch('https://api.530.news/api/lunar?date=today&timezone=8');
+    const json = await resp.json();
+    if (json.code === 200) {
+      lunarCache = json.data;
+      return lunarCache;
+    }
+  } catch(e) {
+    console.warn('农历API获取失败:', e.message);
+  }
+  return null;
+}
+
 async function refresh() {
   const app = document.getElementById('app');
   const btn = document.getElementById('refreshBtn');
@@ -228,11 +253,12 @@ async function refresh() {
   app.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div>';
 
   try {
-    const [visits, divinations] = await Promise.all([
+    const [visits, divinations, lunar] = await Promise.all([
       supabaseQuery('visits', '*', { order: 'time.desc', limit: 5000 }),
-      supabaseQuery('divinations', '*', { order: 'time.desc', limit: 5000 })
+      supabaseQuery('divinations', '*', { order: 'time.desc', limit: 5000 }),
+      fetchLunar()
     ]);
-    render(visits || [], divinations || []);
+    render(visits || [], divinations || [], lunar);
   } catch(e) {
     app.innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>加载失败</p><p style="font-size:12px;">' + e.message + '</p></div>';
   }
@@ -240,7 +266,7 @@ async function refresh() {
   btn.textContent = '🔄 刷新数据';
 }
 
-function render(visits, divinations) {
+function render(visits, divinations, lunar) {
   const app = document.getElementById('app');
 
   if (visits.length === 0 && divinations.length === 0) {
@@ -370,6 +396,16 @@ function render(visits, divinations) {
   const onlineCount = countOnline(visits);
   html += `<div class="card"><div class="num"><span class="online-dot"></span>${onlineCount}</div><div class="label">🟢 近5分钟在线</div></div>`;
   html += '</div>';
+
+  // ==================== 农历信息卡片 ====================
+  if (lunar) {
+    const festivals = lunar.festival && lunar.festival.length > 0 ? ' · ' + lunar.festival.join('、') : '';
+    html += '<div class="lunar-card">';
+    html += `<div class="lunar-date">📅 ${lunar.solar.year}年${lunar.solar.month}月${lunar.solar.day}日 ${lunar.weekDay}</div>`;
+    html += `<div class="lunar-ganzhi">农历 ${lunar.lunarMonthName}${lunar.lunarDayName}${festivals}</div>`;
+    html += `<div class="lunar-detail">${lunar.yearInGanZhi}年（${lunar.zodiac}） · ${lunar.monthInGanZhi}月 · ${lunar.dayInGanZhi}日</div>`;
+    html += '</div>';
+  }
 
   // ==================== 每日趋势折线图（Canvas） ====================
   const dailyVisits = {}, dailyDivs = {};
