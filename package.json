@@ -1,0 +1,12 @@
+{
+  "name": "bagua-divination",
+  "version": "1.0.0",
+  "description": "周易八卦在线占卜 - 含数据收集功能",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^11.0.0"
+  }
+}
