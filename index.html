@@ -2241,7 +2241,6 @@ async function startCasting() {
 
   document.getElementById('castBtn').disabled = true;
   document.getElementById('resultSection').classList.remove('visible');
-  document.getElementById('castingArea').classList.add('visible');
   document.getElementById('questionSection').style.opacity = '0.5';
 
   const castingTitle = document.getElementById('castingTitle');
@@ -2249,39 +2248,39 @@ async function startCasting() {
   const coinArea = document.getElementById('coinCastingArea');
   const scene3d = document.querySelector('.scene3d');
   const linesProgress = document.getElementById('linesProgress');
+  const meihuaArea = document.getElementById('meihuaCastingArea');
 
   // 铜钱法 / 梅花易数 / 蓍草：不同动画
   const isCoinMethod = currentMethod === 'coin';
   const isMeihuaMethod = currentMethod === 'meihua';
-  const meihuaArea = document.getElementById('meihuaCastingArea');
+
+  // 先设置好各区域的显示状态，再加 visible
+  coinArea.classList.remove('visible');
+  meihuaArea.classList.remove('visible');
 
   if (isCoinMethod) {
-    // 铜钱法：隐藏阵盘，显示铜钱动画
     castingTitle.textContent = '掷钱中…';
     document.getElementById('castingSubtitle').textContent = '三枚铜钱 · 一掷一爻 · 六掷成卦';
     modeSwitch.style.display = 'none';
     scene3d.style.display = 'none';
     coinArea.classList.add('visible');
-    meihuaArea.classList.remove('visible');
     document.querySelector('.classical-quote').style.display = 'none';
   } else if (isMeihuaMethod) {
-    // 梅花易数：隐藏阵盘，显示数字起卦动画
     castingTitle.textContent = '推数中…';
     document.getElementById('castingSubtitle').textContent = '年月日时 · 各有其数 · 以数起卦';
     modeSwitch.style.display = 'none';
     scene3d.style.display = 'none';
-    coinArea.classList.remove('visible');
     meihuaArea.classList.add('visible');
     document.querySelector('.classical-quote').style.display = 'none';
   } else {
-    // 蓍草：显示阵盘
     castingTitle.textContent = '演卦中…';
     document.getElementById('castingSubtitle').textContent = '初爻为基 · 上爻为末 · 自下而上成卦';
     modeSwitch.style.display = 'flex';
     scene3d.style.display = '';
-    coinArea.classList.remove('visible');
-    meihuaArea.classList.remove('visible');
   }
+
+  // 最后才显示 castingArea，避免 flicker
+  document.getElementById('castingArea').classList.add('visible');
 
   // 重置
   currentYaoArray = [];
