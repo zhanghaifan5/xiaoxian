@@ -1059,6 +1059,110 @@
     z-index: 1;
   }
 
+  /* ===== 梅花易数数字起卦动画 ===== */
+  .meihua-casting-area {
+    display: none;
+    text-align: center;
+    margin: 0 auto 24px;
+    max-width: 500px;
+  }
+  .meihua-casting-area.visible { display: block; }
+
+  .meihua-stage {
+    background: linear-gradient(160deg, #1a1520 0%, #120e18 100%);
+    border: 2px solid rgba(180,140,200,0.3);
+    border-radius: 16px;
+    padding: 30px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.4);
+  }
+  .meihua-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(180,140,200,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .meihua-nums {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: baseline;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .meihua-num-item {
+    text-align: center;
+    min-width: 56px;
+  }
+  .meihua-num-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .meihua-num-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--gold-light);
+    text-shadow: 0 0 16px rgba(200,168,200,0.3);
+    transition: all 0.6s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .meihua-num-value.rolling {
+    animation: num-roll 0.15s steps(1) infinite;
+    color: #c8a8e0;
+    text-shadow: 0 0 20px rgba(180,140,200,0.5);
+  }
+  @keyframes num-roll {
+    0% { opacity: 0.6; transform: translateY(-2px); }
+    50% { opacity: 1; transform: translateY(2px); }
+    100% { opacity: 0.6; transform: translateY(-2px); }
+  }
+
+  .meihua-seed-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .meihua-seed-display {
+    font-size: 40px;
+    font-weight: bold;
+    color: #c8a8e0;
+    text-shadow: 0 0 24px rgba(180,140,200,0.5);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .meihua-yao-result {
+    font-size: 16px;
+    color: #c8a8e0;
+    letter-spacing: 2px;
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 梅花易数花瓣飘落粒子 */
+  .meihua-petal {
+    position: absolute;
+    font-size: 16px;
+    pointer-events: none;
+    animation: petal-fall linear forwards;
+    z-index: 0;
+    opacity: 0.7;
+  }
+  @keyframes petal-fall {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.9; }
+    50% { opacity: 0.6; }
+    100% { transform: translateY(200px) rotate(720deg) scale(0.3); opacity: 0; }
+  }
+
   /* ===== 解读区经典文本样式 ===== */
   .classical-text {
     background: #111;
@@ -1154,6 +1258,32 @@
         <div class="coin-result-label" id="coinResultLabel"></div>
         <div class="coin-sum-display" id="coinSumDisplay"></div>
         <div class="coin-yao-result" id="coinYaoResult"></div>
+      </div>
+    </div>
+
+    <!-- 梅花易数数字动画 -->
+    <div class="meihua-casting-area" id="meihuaCastingArea">
+      <div class="meihua-stage" id="meihuaStage">
+        <div class="meihua-nums" id="meihuaNums">
+          <div class="meihua-num-item">
+            <div class="meihua-num-label">年</div>
+            <div class="meihua-num-value" id="mhYear">—</div>
+          </div>
+          <div class="meihua-num-item">
+            <div class="meihua-num-label">月</div>
+            <div class="meihua-num-value" id="mhMonth">—</div>
+          </div>
+          <div class="meihua-num-item">
+            <div class="meihua-num-label">日</div>
+            <div class="meihua-num-value" id="mhDay">—</div>
+          </div>
+          <div class="meihua-num-item">
+            <div class="meihua-num-label">时</div>
+            <div class="meihua-num-value" id="mhHour">—</div>
+          </div>
+        </div>
+        <div class="meihua-seed-row" id="meihuaSeedRow"></div>
+        <div class="meihua-yao-result" id="meihuaYaoResult"></div>
       </div>
     </div>
 
@@ -1810,6 +1940,106 @@ async function animateCoinToss(yaoResult, yaoIndex) {
   });
 }
 
+// ==================== 梅花易数数字推演动画 ====================
+async function animateMeihuaNum(yaoResult, yaoIndex) {
+  const detail = yaoResult.detail || {};
+  const year = detail.year || 2024;
+  const month = detail.month || 1;
+  const day = detail.day || 1;
+  const hour = detail.hour || 12;
+  const seed = detail.seed || 0;
+  const posNames = ['初', '二', '三', '四', '五', '上'];
+
+  // 获取元素
+  const mhYear = document.getElementById('mhYear');
+  const mhMonth = document.getElementById('mhMonth');
+  const mhDay = document.getElementById('mhDay');
+  const mhHour = document.getElementById('mhHour');
+  const seedRow = document.getElementById('meihuaSeedRow');
+  const yaoResultDiv = document.getElementById('meihuaYaoResult');
+  const stage = document.getElementById('meihuaStage');
+
+  // 清除上次
+  seedRow.innerHTML = '';
+  yaoResultDiv.textContent = '';
+
+  // 撒花瓣
+  spawnMeihuaPetals(stage, 6);
+
+  // 阶段1: 年月日时数字滚动
+  const fields = [
+    { el: mhYear, target: year },
+    { el: mhMonth, target: month },
+    { el: mhDay, target: day },
+    { el: mhHour, target: hour },
+  ];
+
+  for (const f of fields) {
+    f.el.textContent = '—';
+  }
+
+  // 逐个数字滚动
+  for (const f of fields) {
+    f.el.classList.add('rolling');
+    // 快速滚动数字效果
+    const rollStart = Date.now();
+    const rollDuration = 600;
+    await new Promise(res => {
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - rollStart;
+        if (elapsed >= rollDuration) {
+          clearInterval(interval);
+          f.el.textContent = f.target;
+          f.el.classList.remove('rolling');
+          res();
+        } else {
+          f.el.textContent = Math.floor(Math.random() * 99) + 1;
+        }
+      }, 60);
+    });
+    await sleep(150);
+  }
+
+  // 阶段2: 显示算式和种子数
+  const formulaText = detail.formulaText || `(${year}+${month}+${day})%100`;
+  seedRow.innerHTML = `
+    <span style="font-size:14px;color:var(--text-dim);">${formulaText}</span>
+    <span style="font-size:14px;color:var(--text-dim);">→</span>
+    <span class="meihua-seed-display">${seed}</span>
+  `;
+
+  await sleep(300);
+
+  // 阶段3: 显示爻象结果
+  const yaoEmoji = yaoResult.yao === 1 ? '⚊ 阳' : '⚋ 阴';
+  const changeNote = yaoResult.changing ? ' ⚡变爻' : '';
+  const labelColor = yaoResult.changing ? '#9b3020' : '#c8a8e0';
+  yaoResultDiv.innerHTML = `第${posNames[yaoIndex]}爻 · ${yaoEmoji} · <span style="color:${labelColor}">${yaoResult.type}${changeNote}</span>`;
+
+  // 当前爻累积
+  currentYaoArray.push(yaoResult.yao);
+
+  await sleep(400);
+}
+
+// 梅花花瓣飘落
+function spawnMeihuaPetals(container, count) {
+  const petalChars = ['🌸', '✿', '❀', '🌺', '💮'];
+  for (let i = 0; i < count; i++) {
+    const petal = document.createElement('span');
+    petal.className = 'meihua-petal';
+    petal.textContent = petalChars[Math.floor(Math.random() * petalChars.length)];
+    petal.style.left = (10 + Math.random() * 80) + '%';
+    petal.style.top = -(10 + Math.random() * 30) + 'px';
+    petal.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    petal.style.animationDelay = (Math.random() * 0.5) + 's';
+    petal.style.fontSize = (12 + Math.random() * 14) + 'px';
+    container.appendChild(petal);
+    // 动画结束后移除
+    setTimeout(() => petal.remove(), 3000);
+  }
+}
+
 function animateBaguaSpin(yaoResult, yaoIndex) {
   return new Promise(resolve => {
     const disk = document.getElementById('baguaDisk');
@@ -1977,17 +2207,22 @@ function tossThreeCoins() {
 function meihuaTimeYao(index) {
   const now = new Date();
   const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate(), h = now.getHours();
-  const seeds = [
-    (y + m + d) % 100, (y * m + d) % 100, (y + m * d) % 100,
-    (y * d + h) % 100, (m * d + h) % 100, (y + m + d + h) % 100,
+  const formulas = [
+    { text: `(${y} + ${m} + ${d}) % 100`, seed: (y + m + d) % 100 },
+    { text: `(${y} × ${m} + ${d}) % 100`, seed: (y * m + d) % 100 },
+    { text: `(${y} + ${m} × ${d}) % 100`, seed: (y + m * d) % 100 },
+    { text: `(${y} × ${d} + ${h}) % 100`, seed: (y * d + h) % 100 },
+    { text: `(${m} × ${d} + ${h}) % 100`, seed: (m * d + h) % 100 },
+    { text: `(${y} + ${m} + ${d} + ${h}) % 100`, seed: (y + m + d + h) % 100 },
   ];
-  const seed = seeds[index];
+  const formula = formulas[index];
+  const seed = formula.seed;
   let type, yao;
   if (seed < 6) { type = '老阴'; yao = 0; }
   else if (seed < 50) { type = '少阴'; yao = 0; }
   else if (seed < 94) { type = '少阳'; yao = 1; }
   else { type = '老阳'; yao = 1; }
-  return { yao, type, changing: type.includes('老'), detail: { year: y, month: m, day: d, hour: h, seed } };
+  return { yao, type, changing: type.includes('老'), detail: { year: y, month: m, day: d, hour: h, seed, formulaText: formula.text } };
 }
 
 function getYao(index) {
@@ -2015,8 +2250,10 @@ async function startCasting() {
   const scene3d = document.querySelector('.scene3d');
   const linesProgress = document.getElementById('linesProgress');
 
-  // 铜钱法 vs 蓍草/梅花：不同动画
+  // 铜钱法 / 梅花易数 / 蓍草：不同动画
   const isCoinMethod = currentMethod === 'coin';
+  const isMeihuaMethod = currentMethod === 'meihua';
+  const meihuaArea = document.getElementById('meihuaCastingArea');
 
   if (isCoinMethod) {
     // 铜钱法：隐藏阵盘，显示铜钱动画
@@ -2025,14 +2262,25 @@ async function startCasting() {
     modeSwitch.style.display = 'none';
     scene3d.style.display = 'none';
     coinArea.classList.add('visible');
+    meihuaArea.classList.remove('visible');
+    document.querySelector('.classical-quote').style.display = 'none';
+  } else if (isMeihuaMethod) {
+    // 梅花易数：隐藏阵盘，显示数字起卦动画
+    castingTitle.textContent = '推数中…';
+    document.getElementById('castingSubtitle').textContent = '年月日时 · 各有其数 · 以数起卦';
+    modeSwitch.style.display = 'none';
+    scene3d.style.display = 'none';
+    coinArea.classList.remove('visible');
+    meihuaArea.classList.add('visible');
     document.querySelector('.classical-quote').style.display = 'none';
   } else {
-    // 蓍草/梅花：显示阵盘
+    // 蓍草：显示阵盘
     castingTitle.textContent = '演卦中…';
     document.getElementById('castingSubtitle').textContent = '初爻为基 · 上爻为末 · 自下而上成卦';
     modeSwitch.style.display = 'flex';
     scene3d.style.display = '';
     coinArea.classList.remove('visible');
+    meihuaArea.classList.remove('visible');
   }
 
   // 重置
@@ -2071,9 +2319,11 @@ async function startCasting() {
       globalChangeIdx += 3;
     }
 
-    // 铜钱法：铜钱投掷动画；其他：阵盘旋转动画
+    // 铜钱法：铜钱投掷动画；梅花：数字推演动画；蓍草：阵盘旋转动画
     if (isCoinMethod) {
       await animateCoinToss(result, i);
+    } else if (isMeihuaMethod) {
+      await animateMeihuaNum(result, i);
     } else {
       await animateBaguaSpin(result, i);
     }
@@ -2114,12 +2364,14 @@ async function startCasting() {
 
   await sleep(600);
 
-  if (!isCoinMethod) {
+  if (isCoinMethod || isMeihuaMethod) {
+    // 铜钱法/梅花易数：也做一次最终阵盘定位展示
+    scene3d.style.display = '';
+    meihuaArea.classList.remove('visible');
+    coinArea.classList.remove('visible');
     finalBaguaRotation(yaoResults);
     await sleep(1800);
   } else {
-    // 铜钱法也做一次最终阵盘定位展示
-    scene3d.style.display = '';
     finalBaguaRotation(yaoResults);
     await sleep(1800);
   }
@@ -2376,6 +2628,7 @@ function resetAll() {
   // 恢复阵盘显示
   document.querySelector('.scene3d').style.display = '';
   document.getElementById('coinCastingArea').classList.remove('visible');
+  document.getElementById('meihuaCastingArea').classList.remove('visible');
 
   // 隐藏模式切换
   const modeSwitch = document.getElementById('baguaModeSwitch');
