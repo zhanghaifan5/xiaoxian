@@ -1957,14 +1957,21 @@ function showResult(yaoResults) {
 
   // 上报占卜数据到 Supabase
   if (window.BaguaTracker) {
+    const hasChange = changingLines.length > 0;
     window.BaguaTracker.recordDivination({
       method: currentMethod,
       question: question,
+      ben_gua_key: benKey,
       ben_gua_name: benGua.name,
       ben_gua_upper: benGua.upper || '',
       ben_gua_lower: benGua.lower || '',
-      bian_gua_name: benKey !== bianKey ? bianGua.name : '',
-      changing_lines: changingLines.length > 0 ? changingLines.join(',') : '',
+      bian_gua_key: hasChange ? bianKey : '',
+      bian_gua_name: hasChange ? bianGua.name : '',
+      bian_gua_upper: hasChange ? (bianGua.upper || '') : '',
+      bian_gua_lower: hasChange ? (bianGua.lower || '') : '',
+      has_change: hasChange,
+      change_count: changingLines.length,
+      changing_lines: hasChange ? changingLines.join(',') : '',
       yao_results: JSON.stringify(yaoResults.map(r => ({ yao: r.yao, changing: r.changing, type: r.type })))
     });
   }

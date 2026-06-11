@@ -16,13 +16,14 @@
     --border: #2e2820;
     --accent: #8b3a1a;
     --jade: #5a8a6a;
+    --warn: #d4a853;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","Noto Serif SC",sans-serif; padding:20px; min-height:100vh; }
-  .container { max-width:1000px; margin:0 auto; }
+  .container { max-width:1100px; margin:0 auto; }
   h1 { text-align:center; color:var(--gold); margin:20px 0 8px; font-size:28px; letter-spacing:4px; }
-  .subtitle { text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:20px; }
-  .nav { text-align:center; margin:16px 0; display:flex; gap:12px; justify-content:center; align-items:center; }
+  .subtitle { text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:16px; }
+  .nav { text-align:center; margin:16px 0; display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; }
   .nav a, .nav button { color:var(--bronze); text-decoration:none; font-size:13px; background:transparent; border:1px solid var(--border); padding:6px 16px; border-radius:6px; cursor:pointer; font-family:inherit; transition:all .3s; }
   .nav a:hover, .nav button:hover { color:var(--gold); border-color:var(--gold); }
   .nav .active { background:rgba(200,168,76,0.12); border-color:var(--gold); color:var(--gold); }
@@ -30,10 +31,10 @@
   .empty { text-align:center; color:var(--text-dim); padding:60px 20px; }
   .empty .icon { font-size:48px; margin-bottom:12px; }
 
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-bottom:24px; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; text-align:center; transition:all .3s; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin-bottom:24px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; transition:all .3s; }
   .card:hover { border-color:var(--bronze); }
-  .card .num { font-size:34px; color:var(--gold-light); font-weight:bold; }
+  .card .num { font-size:30px; color:var(--gold-light); font-weight:bold; }
   .card .label { font-size:12px; color:var(--text-dim); margin-top:4px; }
   .card .sub { font-size:11px; color:#5a5040; margin-top:2px; }
 
@@ -44,23 +45,44 @@
   th { color:var(--text-dim); font-weight:normal; font-size:12px; }
   td { color:var(--text); }
   .bar-wrap { display:flex; align-items:center; gap:8px; }
-  .bar { height:16px; background:linear-gradient(90deg,var(--bronze-dark),var(--bronze)); border-radius:4px; min-width:4px; transition:width .5s; }
+  .bar { height:14px; background:linear-gradient(90deg,#5a4530,var(--bronze)); border-radius:3px; min-width:3px; transition:width .5s; }
   .bar-count { font-size:12px; color:var(--text-dim); white-space:nowrap; }
+  .bar.pct { background:linear-gradient(90deg,#3a5a30,var(--jade)); }
+  .bar.warn { background:linear-gradient(90deg,#5a3a20,var(--warn)); }
 
   .recent { max-height:500px; overflow-y:auto; }
   .recent::-webkit-scrollbar { width:6px; }
-  .recent::-webkit-scrollbar-thumb { background:var(--bronze-dark); border-radius:3px; }
+  .recent::-webkit-scrollbar-thumb { background:#3a3020; border-radius:3px; }
 
   .note { text-align:center; color:var(--text-dim); font-size:11px; margin-top:30px; padding:10px; }
   .loading { text-align:center; padding:60px; color:var(--text-dim); }
   .loading .spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
   @keyframes spin { to { transform:rotate(360deg); } }
 
-  .time-filter { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-  .time-filter select { background:#111; border:1px solid var(--border); color:var(--text); padding:6px 12px; border-radius:6px; font-family:inherit; font-size:13px; }
-
   .row { display:flex; gap:16px; flex-wrap:wrap; }
   .col { flex:1; min-width:280px; }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; margin:0 2px; }
+  .badge-change { background:rgba(200,168,76,0.2); color:var(--gold); }
+  .badge-none { background:rgba(90,138,106,0.2); color:var(--jade); }
+
+  .trigram-list { display:flex; flex-wrap:wrap; gap:6px; }
+  .trigram-tag { background:rgba(200,168,76,0.08); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:12px; white-space:nowrap; }
+  .trigram-tag .name { color:var(--text); }
+  .trigram-tag .count { color:var(--text-dim); margin-left:4px; }
+
+  .hour-bar { display:flex; gap:1px; align-items:flex-end; height:80px; }
+  .hour-col { flex:1; background:rgba(200,168,76,0.25); border-radius:2px 2px 0 0; min-width:8px; position:relative; transition:height .4s; cursor:default; }
+  .hour-col:hover { background:var(--gold); }
+  .hour-col span { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--text-dim); white-space:nowrap; }
+
+  .pie-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .pie-item { background:rgba(0,0,0,0.2); border-radius:8px; padding:12px; text-align:center; }
+  .pie-item .pie-name { font-size:12px; color:var(--text-dim); margin-bottom:4px; }
+  .pie-item .pie-num { font-size:20px; color:var(--gold-light); font-weight:bold; }
+  .pie-item .pie-pct { font-size:11px; color:#5a5040; }
+
+  .question-list td.qtext { max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -69,6 +91,7 @@
 <div class="subtitle">所有用户数据汇总（Supabase 云端）</div>
 <div class="nav">
   <button onclick="refresh()" class="active" id="refreshBtn">🔄 刷新数据</button>
+  <button onclick="toggleMode()" id="modeBtn">📊 切换视图</button>
   <a href="index.html">🏠 返回首页</a>
 </div>
 <div id="app"><div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div></div>
@@ -79,6 +102,8 @@
 const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
 
+let currentMode = 'full'; // 'full' | 'compact'
+
 async function supabaseQuery(table, select, opts) {
   let url = SUPABASE_URL + '/rest/v1/' + table + '?select=' + encodeURIComponent(select);
   if (opts && opts.order) url += '&order=' + encodeURIComponent(opts.order);
@@ -88,6 +113,12 @@ async function supabaseQuery(table, select, opts) {
   });
   if (!resp.ok) throw new Error('Query failed: ' + resp.status);
   return resp.json();
+}
+
+function toggleMode() {
+  currentMode = currentMode === 'full' ? 'compact' : 'full';
+  document.getElementById('modeBtn').textContent = currentMode === 'full' ? '📊 紧凑视图' : '📊 展开视图';
+  refresh();
 }
 
 async function refresh() {
@@ -118,126 +149,287 @@ function render(visits, divinations) {
     return;
   }
 
-  // 统计
-  const sessions = new Set();
-  visits.forEach(v => sessions.add(v.session_id));
-  divinations.forEach(d => sessions.add(d.session_id));
+  // ===== 基础统计 =====
+  const allSessions = new Set();
+  visits.forEach(v => allSessions.add(v.session_id));
+  divinations.forEach(d => allSessions.add(d.session_id));
+  const visitSessions = new Set(visits.map(v => v.session_id));
+  const divSessions = new Set(divinations.map(d => d.session_id));
 
-  const browsers = {}, devices = {}, oses = {};
+  // 浏览器 / 设备 / 系统
+  const browsers = {}, devices = {}, oses = {}, screenSizes = {}, languages = {}, referrers = {};
   visits.forEach(v => {
     browsers[v.browser] = (browsers[v.browser]||0)+1;
     devices[v.device] = (devices[v.device]||0)+1;
     oses[v.os] = (oses[v.os]||0)+1;
+    if (v.screen_size) screenSizes[v.screen_size] = (screenSizes[v.screen_size]||0)+1;
+    if (v.language) languages[v.language] = (languages[v.language]||0)+1;
+    const ref = (v.referrer||'direct').split('/')[2] || v.referrer || 'direct';
+    referrers[ref] = (referrers[ref]||0)+1;
   });
 
-  const guaCounts = {}, methodCounts = {};
+  // 占卜统计
+  const methodCounts = {}, guaCounts = {}, benGuaKeys = {}, bianGuaCounts = {};
+  const upperTrigrams = {}, lowerTrigrams = {};
+  const changeLineCounts = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+  let withChange = 0, withoutChange = 0;
+  const hourCounts = {};
+  const weekdayCounts = {};
+  const questions = [];
+
   divinations.forEach(d => {
-    if (d.ben_gua_name) guaCounts[d.ben_gua_name] = (guaCounts[d.ben_gua_name]||0)+1;
+    // 方法
     if (d.method) methodCounts[d.method] = (methodCounts[d.method]||0)+1;
+    // 本卦
+    if (d.ben_gua_name) guaCounts[d.ben_gua_name] = (guaCounts[d.ben_gua_name]||0)+1;
+    if (d.ben_gua_key) benGuaKeys[d.ben_gua_key] = (benGuaKeys[d.ben_gua_key]||0)+1;
+    // 变卦
+    if (d.bian_gua_name) bianGuaCounts[d.bian_gua_name] = (bianGuaCounts[d.bian_gua_name]||0)+1;
+    // 上卦/下卦
+    if (d.ben_gua_upper) upperTrigrams[d.ben_gua_upper] = (upperTrigrams[d.ben_gua_upper]||0)+1;
+    if (d.ben_gua_lower) lowerTrigrams[d.ben_gua_lower] = (lowerTrigrams[d.ben_gua_lower]||0)+1;
+    // 动爻
+    const cc = d.change_count !== null && d.change_count !== undefined ? d.change_count : (d.changing_lines ? d.changing_lines.split(',').filter(x=>x!=='').length : 0);
+    if (cc > 0) withChange++; else withoutChange++;
+    if (changeLineCounts[cc] !== undefined) changeLineCounts[cc]++;
+    else changeLineCounts[cc] = 1;
+    // 时段
+    if (d.time) {
+      const h = new Date(d.time.replace(' ','T') + '+08:00').getHours();
+      hourCounts[h] = (hourCounts[h]||0)+1;
+      const wd = new Date(d.time.replace(' ','T') + '+08:00').getDay();
+      weekdayCounts[wd] = (weekdayCounts[wd]||0)+1;
+    }
+    // 问题
+    if (d.question) questions.push({q:d.question, time:d.time, gua:d.ben_gua_name});
   });
 
-  const topGua = Object.entries(guaCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  const maxGua = topGua.length ? topGua[0][1] : 1;
+  // ===== 排序辅助 =====
+  const sortByVal = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+  const maxOf = arr => arr.length ? arr[0][1] : 1;
 
   let html = '';
 
-  // 概览卡片
+  // ==================== 概览卡片（丰富版） ====================
   html += '<div class="cards">';
-  html += `<div class="card"><div class="num">${visits.length}</div><div class="label">总访问次数</div></div>`;
-  html += `<div class="card"><div class="num">${sessions.size}</div><div class="label">独立用户数</div></div>`;
-  html += `<div class="card"><div class="num">${divinations.length}</div><div class="label">总占卜次数</div></div>`;
-  const avgPerUser = sessions.size ? (divinations.length / sessions.size).toFixed(1) : '0';
-  html += `<div class="card"><div class="num">${avgPerUser}</div><div class="label">人均占卜次数</div></div>`;
+  html += `<div class="card"><div class="num">${visits.length}</div><div class="label">📈 总访问次数</div></div>`;
+  html += `<div class="card"><div class="num">${visitSessions.size}</div><div class="label">👤 独立访客数</div></div>`;
+  html += `<div class="card"><div class="num">${divinations.length}</div><div class="label">🔮 总占卜次数</div></div>`;
+  html += `<div class="card"><div class="num">${divSessions.size}</div><div class="label">🔮 占卜用户数</div></div>`;
+  const avgDiv = divSessions.size ? (divinations.length / divSessions.size).toFixed(1) : '0';
+  html += `<div class="card"><div class="num">${avgDiv}</div><div class="label">👤 人均占卜</div></div>`;
+  const visitRate = visitSessions.size ? ((divSessions.size / visitSessions.size)*100).toFixed(0) : '0';
+  html += `<div class="card"><div class="num">${visitRate}%</div><div class="label">🎯 访问转化率</div></div>`;
+  const changeRate = divinations.length ? ((withChange / divinations.length)*100).toFixed(0) : '0';
+  html += `<div class="card"><div class="num">${changeRate}%</div><div class="label">🔄 有变爻比例</div></div>`;
+  html += `<div class="card"><div class="num">${Object.keys(guaCounts).length}</div><div class="label">📚 覆盖卦象数</div><div class="sub">/ 64</div></div>`;
   html += '</div>';
 
-  html += '<div class="row">';
+  if (currentMode === 'compact') {
+    html += renderCompact(visits, divinations, {browsers,devices,oses,methodCounts,guaCounts,bianGuaCounts,hourCounts,changeLineCounts,withChange,withoutChange,questions,upperTrigrams,lowerTrigrams,screenSizes,languages,referrers,weekdayCounts});
+    app.innerHTML = html;
+    return;
+  }
 
-  // 浏览器
-  html += '<div class="col"><div class="section"><h2>🌐 浏览器分布</h2><table>';
-  const browserSorted = Object.entries(browsers).sort((a,b)=>b[1]-a[1]);
-  const maxBrowser = browserSorted.length ? browserSorted[0][1] : 1;
-  browserSorted.forEach(([k,v])=>{
-    html += `<tr><td>${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxBrowser)*120)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
-  });
-  html += '</table></div></div>';
-
-  // 设备
-  html += '<div class="col"><div class="section"><h2>📱 设备类型</h2><table>';
-  const devSorted = Object.entries(devices).sort((a,b)=>b[1]-a[1]);
-  const maxDev = devSorted.length ? devSorted[0][1] : 1;
-  devSorted.forEach(([k,v])=>{
-    html += `<tr><td>${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxDev)*120)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
-  });
-  html += '</table></div></div>';
-
+  // ==================== 时段分布 ====================
+  html += '<div class="section"><h2>🕐 占卜时段分布（24小时）</h2>';
+  const maxHour = Math.max(1, ...Object.values(hourCounts));
+  html += '<div class="hour-bar" style="margin-bottom:24px">';
+  for (let h=0; h<24; h++) {
+    const v = hourCounts[h]||0;
+    const pct = Math.max(4, (v/maxHour)*100);
+    html += `<div class="hour-col" style="height:${pct}%" title="${h}时: ${v}次"><span>${h}</span></div>`;
+  }
   html += '</div>';
 
-  // 操作系统
-  html += '<div class="section"><h2>💻 操作系统</h2><table>';
-  const osSorted = Object.entries(oses).sort((a,b)=>b[1]-a[1]);
-  const maxOs = osSorted.length ? osSorted[0][1] : 1;
-  osSorted.forEach(([k,v])=>{
-    html += `<tr><td>${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxOs)*300)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+  // 星期分布
+  const wdNames = ['日','一','二','三','四','五','六'];
+  const wdSorted = sortByVal(weekdayCounts);
+  const maxWd = maxOf(wdSorted);
+  html += '<table style="margin-top:10px">';
+  wdSorted.forEach(([k,v])=>{
+    html += `<tr><td>星期${wdNames[parseInt(k)]}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxWd)*200)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
   });
   html += '</table></div>';
 
-  // 热门卦象
-  if (topGua.length) {
-    html += '<div class="section"><h2>🏆 热门卦象排行</h2><table>';
-    topGua.forEach(([k,v],i)=>{
-      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxGua)*200)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
-    });
-    html += '</table></div>';
-  }
+  // ==================== 浏览器 / 设备 / 系统 / 屏幕 ====================
+  html += '<div class="row">';
+  html += buildBarSection('🌐 浏览器分布', browsers, 100);
+  html += buildBarSection('📱 设备类型', devices, 100);
+  html += '</div>';
 
-  // 占卜方法
-  if (Object.keys(methodCounts).length) {
+  html += '<div class="row">';
+  html += buildBarSection('💻 操作系统', oses, 140);
+  html += buildBarSection('🖥 屏幕分辨率', screenSizes, 140);
+  html += '</div>';
+
+  // 语言 & 来源
+  html += '<div class="row">';
+  html += buildBarSection('🗣 浏览器语言', languages, 120);
+  html += buildBarSection('🔗 流量来源', referrers, 140);
+  html += '</div>';
+
+  // ==================== 占卜方法 ====================
+  const methodNames = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
+  const methodSorted = sortByVal(methodCounts);
+  if (methodSorted.length) {
     html += '<div class="section"><h2>🎯 占卜方法偏好</h2><table>';
-    const methodNames = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
-    const methodSorted = Object.entries(methodCounts).sort((a,b)=>b[1]-a[1]);
-    const maxMethod = methodSorted.length ? methodSorted[0][1] : 1;
+    const maxM = maxOf(methodSorted);
     methodSorted.forEach(([k,v])=>{
-      html += `<tr><td>${methodNames[k]||k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxMethod)*180)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
+      html += `<tr><td>${methodNames[k]||k}</td><td><div class="bar-wrap"><div class="bar pct" style="width:${Math.max(20,(v/maxM)*180)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
     });
     html += '</table></div>';
   }
 
-  // 最近占卜记录
+  // ==================== 动爻统计 ====================
+  html += '<div class="section"><h2>🎲 动爻数量分布</h2>';
+  html += '<div class="pie-grid">';
+  const clSorted = Object.entries(changeLineCounts).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  clSorted.forEach(([k,v])=>{
+    const label = k === '0' ? '静卦(无动爻)' : k + '个动爻';
+    html += `<div class="pie-item"><div class="pie-num">${v}</div><div class="pie-name">${label}</div><div class="pie-pct">${((v/divinations.length)*100).toFixed(0)}%</div></div>`;
+  });
+  html += '</div></div>';
+
+  // ==================== 上卦/下卦分布 ====================
+  html += '<div class="row">';
+  html += buildBarSection('☰ 本卦上卦（外卦）分布', upperTrigrams, 130);
+  html += buildBarSection('☷ 本卦下卦（内卦）分布', lowerTrigrams, 130);
+  html += '</div>';
+
+  // ==================== 热门本卦 ====================
+  const topGua = sortByVal(guaCounts).slice(0, 15);
+  if (topGua.length) {
+    html += '<div class="section"><h2>🏆 热门本卦 TOP15</h2><table>';
+    const maxG = maxOf(topGua);
+    topGua.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxG)*220)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(1)}%)</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 热门变卦 ====================
+  const topBian = sortByVal(bianGuaCounts).slice(0, 10);
+  if (topBian.length) {
+    html += '<div class="section"><h2>🔄 热门变卦 TOP10</h2><table>';
+    const maxB = maxOf(topBian);
+    topBian.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar warn" style="width:${Math.max(16,(v/maxB)*220)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 最近占卜记录（含完整信息） ====================
   if (divinations.length) {
     html += '<div class="section"><h2>📋 最近占卜记录</h2><div class="recent"><table>';
-    html += '<tr><th>时间</th><th>卦象</th><th>方法</th><th>动爻</th><th>问题</th></tr>';
-    const methodNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
+    html += '<tr><th>时间</th><th>本卦</th><th>变卦</th><th>方法</th><th>动爻</th><th>变爻数</th><th>问题</th></tr>';
+    const mNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
     divinations.slice(0, 100).forEach(d=>{
-      const question = d.question ? (d.question.length > 15 ? d.question.slice(0,15)+'...' : d.question) : '-';
+      const question = d.question ? (d.question.length > 20 ? d.question.slice(0,20)+'…' : d.question) : '-';
+      const hasChange = d.has_change || (d.bian_gua_name && d.bian_gua_name !== '');
       html += `<tr>
         <td style="white-space:nowrap">${(d.time||'').slice(0,16)}</td>
         <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
-        <td>${methodNames[d.method]||d.method||''}</td>
+        <td style="color:${hasChange?'var(--gold-light)':'var(--text-dim)'}">${hasChange?(d.bian_gua_name||'?') : '—'}</td>
+        <td>${mNames[d.method]||d.method||''}</td>
         <td>${d.changing_lines||'无'}</td>
-        <td style="color:var(--text-dim);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.question||''}">${question}</td>
+        <td><span class="badge ${d.change_count>0?'badge-change':'badge-none'}">${d.change_count||0}爻</span></td>
+        <td class="qtext" title="${d.question||''}">${question}</td>
       </tr>`;
     });
     html += '</table></div></div>';
   }
 
-  // 最近访问
+  // ==================== 最近访问 ====================
   if (visits.length) {
     html += '<div class="section"><h2>🌍 最近访问记录</h2><div class="recent"><table>';
-    html += '<tr><th>时间</th><th>浏览器</th><th>系统</th><th>设备</th><th>屏幕</th><th>来源</th></tr>';
+    html += '<tr><th>时间</th><th>Session</th><th>浏览器</th><th>系统</th><th>设备</th><th>屏幕</th><th>语言</th><th>来源</th></tr>';
     visits.slice(0, 50).forEach(v=>{
       html += `<tr>
         <td style="white-space:nowrap">${(v.time||'').slice(0,16)}</td>
+        <td style="font-size:11px;color:var(--text-dim)">${(v.session_id||'').slice(-12)}</td>
         <td>${v.browser||''}</td>
         <td>${v.os||''}</td>
         <td>${v.device||''}</td>
         <td>${v.screen_size||''}</td>
+        <td>${v.language||''}</td>
         <td style="color:var(--text-dim);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.referrer||''}">${(v.referrer||'direct').slice(0,30)}</td>
       </tr>`;
     });
     html += '</table></div></div>';
   }
 
+  // ==================== 热门问题 ====================
+  if (questions.length) {
+    html += '<div class="section"><h2>💬 热门问题词频</h2><div class="trigram-list">';
+    // 简单词频统计
+    const wordFreq = {};
+    const stopWords = new Set(['的','了','吗','呢','吧','啊','我','你','他','她','它','这','那','是','会','不','能','可以','一个','什么','怎么','为什么','怎么样','有没有','是不是']);
+    questions.forEach(q => {
+      const words = q.q.replace(/[，。！？、；：""''（）【】《》\s,.!?;:'"()\[\]{}]/g,' ').split(' ').filter(w => w.length >= 1 && !stopWords.has(w));
+      words.forEach(w => { wordFreq[w] = (wordFreq[w]||0)+1; });
+    });
+    const topWords = sortByVal(wordFreq).slice(0, 30);
+    const maxW = maxOf(topWords);
+    topWords.forEach(([w,c]) => {
+      const size = 11 + Math.floor((c/maxW)*14);
+      const alpha = 0.4 + (c/maxW)*0.6;
+      html += `<span style="font-size:${size}px;color:rgba(200,168,76,${alpha.toFixed(2)});margin:0 4px;display:inline-block;line-height:1.8">${w}</span>`;
+    });
+    html += '</div></div>';
+  }
+
   app.innerHTML = html;
+}
+
+// ===== 紧凑视图 =====
+function renderCompact(visits, divinations, ctx) {
+  let h = '';
+  h += '<div class="row">';
+  h += buildBarSection('🌐 浏览器', ctx.browsers, 100);
+  h += buildBarSection('📱 设备', ctx.devices, 100);
+  h += '</div>';
+  h += buildBarSection('💻 操作系统', ctx.oses, 200);
+
+  const mNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
+  const topGua = sortByVal(ctx.guaCounts).slice(0, 8);
+  if (topGua.length) {
+    h += '<div class="section"><h2>🏆 热门卦象 TOP8</h2><table>';
+    const maxG = topGua[0][1];
+    topGua.forEach(([k,v],i)=>{
+      h += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxG)*160)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    h += '</table></div>';
+  }
+
+  if (divinations.length) {
+    h += '<div class="section"><h2>📋 最近占卜</h2><div class="recent"><table>';
+    h += '<tr><th>时间</th><th>本卦</th><th>变卦</th><th>动爻</th><th>问题</th></tr>';
+    divinations.slice(0, 30).forEach(d=>{
+      const question = d.question ? (d.question.length > 15 ? d.question.slice(0,15)+'…' : d.question) : '-';
+      h += `<tr>
+        <td style="white-space:nowrap">${(d.time||'').slice(0,16)}</td>
+        <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
+        <td>${d.bian_gua_name||'—'}</td>
+        <td>${d.changing_lines||'无'}</td>
+        <td class="qtext" title="${d.question||''}">${question}</td>
+      </tr>`;
+    });
+    h += '</table></div></div>';
+  }
+  return h;
+}
+
+function buildBarSection(title, data, barW) {
+  const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
+  if (!sorted.length) return '';
+  const maxV = sorted[0][1];
+  let h = '<div class="col"><div class="section"><h2>' + title + '</h2><table>';
+  sorted.forEach(([k,v])=>{
+    h += `<tr><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${k}">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(14,(v/maxV)*barW)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+  });
+  h += '</table></div></div>';
+  return h;
 }
 
 document.addEventListener('DOMContentLoaded', refresh);
