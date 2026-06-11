@@ -926,6 +926,139 @@
     50% { box-shadow: 0 0 16px rgba(200,168,76,0.6); }
   }
 
+  /* ===== 铜钱投掷动画 ===== */
+  .coin-casting-area {
+    display: none;
+    text-align: center;
+    margin: 0 auto 24px;
+    max-width: 400px;
+  }
+  .coin-casting-area.visible { display: block; }
+
+  .coin-toss-stage {
+    background: linear-gradient(160deg, #1e1a12 0%, #14110c 100%);
+    border: 2px solid var(--bronze-dark);
+    border-radius: 16px;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.4);
+  }
+  .coin-toss-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(139,125,90,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* 三枚铜钱容器 */
+  .three-coins {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    perspective: 400px;
+  }
+  .coin-item {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .coin-item .coin-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    font-size: 28px;
+    font-weight: bold;
+    border: 3px solid var(--bronze);
+  }
+  .coin-item .coin-front {
+    background: linear-gradient(135deg, #c9a84c 0%, #e8d38c 40%, #b8922e 100%);
+    color: #5a3e0a;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 0 12px rgba(200,168,76,0.3), inset 0 2px 4px rgba(255,255,255,0.15);
+    transform: rotateY(0deg);
+  }
+  .coin-item .coin-back {
+    background: linear-gradient(135deg, #8b7355 0%, #a89070 40%, #6b5335 100%);
+    color: #3a2a10;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.15);
+    box-shadow: 0 0 12px rgba(139,115,85,0.3), inset 0 2px 4px rgba(255,255,255,0.08);
+    transform: rotateY(180deg);
+  }
+  .coin-item.tossing {
+    animation: coin-spin 0.6s ease-in-out;
+  }
+  .coin-item.tossing-fast {
+    animation: coin-spin-fast 0.8s ease-in-out;
+  }
+  @keyframes coin-spin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(1800deg); }
+  }
+  @keyframes coin-spin-fast {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(2520deg); }
+  }
+
+  .coin-result-label {
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-top: 10px;
+    animation: fadeSlideUp 0.4s ease;
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .coin-sum-display {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  .coin-sum-digit {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(200,168,76,0.4);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.3); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .coin-yao-result {
+    font-size: 16px;
+    color: var(--bronze-light);
+    letter-spacing: 2px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
   /* ===== 解读区经典文本样式 ===== */
   .classical-text {
     background: #111;
@@ -968,7 +1101,7 @@
 
     <div class="method-tabs">
       <button class="method-tab active" data-method="shicao">🌿 大衍蓍草（系辞古法）</button>
-      <button class="method-tab" data-method="coin">🪙 三钱代蓍（火珠林法）</button>
+      <button class="method-tab" data-method="coin">🪙🪙🪙 三钱代蓍（火珠林法）</button>
       <button class="method-tab" data-method="meihua">🌸 年月日时（梅花易数）</button>
     </div>
 
@@ -998,8 +1131,31 @@
 
   <!-- 起卦过程 -->
   <div class="casting-area" id="castingArea">
-    <h3 style="color:var(--bronze-light);letter-spacing:3px;margin-bottom:4px;">演卦中…</h3>
+    <h3 style="color:var(--bronze-light);letter-spacing:3px;margin-bottom:4px;" id="castingTitle">演卦中…</h3>
     <p style="color:var(--text-dim);font-size:13px;margin-bottom:4px;" id="castingSubtitle">初爻为基 · 上爻为末 · 自下而上成卦</p>
+
+    <!-- 铜钱投掷动画（三钱代蓍专用） -->
+    <div class="coin-casting-area" id="coinCastingArea">
+      <div class="coin-toss-stage" id="coinTossStage">
+        <div class="three-coins" id="threeCoins">
+          <div class="coin-item" id="coin0">
+            <div class="coin-face coin-front">乾</div>
+            <div class="coin-face coin-back">坤</div>
+          </div>
+          <div class="coin-item" id="coin1">
+            <div class="coin-face coin-front">乾</div>
+            <div class="coin-face coin-back">坤</div>
+          </div>
+          <div class="coin-item" id="coin2">
+            <div class="coin-face coin-front">乾</div>
+            <div class="coin-face coin-back">坤</div>
+          </div>
+        </div>
+        <div class="coin-result-label" id="coinResultLabel"></div>
+        <div class="coin-sum-display" id="coinSumDisplay"></div>
+        <div class="coin-yao-result" id="coinYaoResult"></div>
+      </div>
+    </div>
 
     <!-- 古文引用 -->
     <div class="classical-quote" id="classicalQuote" style="display:none;"></div>
@@ -1254,7 +1410,7 @@ let currentMethod = 'shicao';
 let isCasting = false;
 
 // 确认占卜弹窗
-const METHOD_NAMES = { shicao: '🌿 大衍蓍草', coin: '🪙 三钱代蓍', meihua: '🌸 梅花易数' };
+const METHOD_NAMES = { shicao: '🌿 大衍蓍草', coin: '🪙🪙🪙 三钱代蓍', meihua: '🌸 梅花易数' };
 
 function showConfirmDialog() {
   if (isCasting) return;
@@ -1586,6 +1742,74 @@ function getCurrentTrigramKey(startIndex) {
   return currentYaoArray.slice(startIndex, startIndex + 3).join('');
 }
 
+// ==================== 铜钱投掷动画（三钱代蓍专用） ====================
+async function animateCoinToss(yaoResult, yaoIndex) {
+  return new Promise(resolve => {
+    const coins = yaoResult.detail ? yaoResult.detail.coins : [2, 2, 2];
+    const sum = yaoResult.detail ? yaoResult.detail.sum : 6;
+    const resultLabel = document.getElementById('coinResultLabel');
+    const sumDisplay = document.getElementById('coinSumDisplay');
+    const yaoResultDiv = document.getElementById('coinYaoResult');
+    const posNames = ['初', '二', '三', '四', '五', '上'];
+
+    // 清除上一次结果
+    resultLabel.textContent = '';
+    sumDisplay.innerHTML = '';
+    yaoResultDiv.textContent = '';
+
+    // 第一阶段：三枚铜钱旋转
+    for (let c = 0; c < 3; c++) {
+      const coinEl = document.getElementById('coin' + c);
+      coinEl.classList.remove('tossing', 'tossing-fast');
+      void coinEl.offsetWidth; // reflow
+      // 每枚铜钱稍有延迟
+      setTimeout(() => {
+        coinEl.classList.add('tossing-fast');
+      }, c * 120);
+    }
+
+    // 旋转结束后展示结果
+    setTimeout(() => {
+      // 设置铜钱最终面
+      for (let c = 0; c < 3; c++) {
+        const coinEl = document.getElementById('coin' + c);
+        coinEl.classList.remove('tossing-fast');
+        // coin face values: 正面=3(阳), 反面=2(阴)
+        const isYang = coins[c] === 3;
+        coinEl.style.transform = isYang ? 'rotateY(0deg)' : 'rotateY(180deg)';
+        // 更新铜钱面的文字
+        const front = coinEl.querySelector('.coin-front');
+        const back = coinEl.querySelector('.coin-back');
+        front.textContent = isYang ? '⚊' : '⚋';
+        back.textContent = isYang ? '⚋' : '⚊';
+      }
+
+      // 显示结果
+      resultLabel.textContent = `第${posNames[yaoIndex]}爻`;
+      resultLabel.style.animation = 'none';
+      void resultLabel.offsetWidth;
+      resultLabel.style.animation = 'fadeSlideUp 0.4s ease';
+
+      // 三枚和
+      sumDisplay.innerHTML = `
+        <span style="font-size:14px;color:var(--text-dim);">${coins[0]}+${coins[1]}+${coins[2]}</span>
+        <span style="font-size:14px;color:var(--text-dim);">=</span>
+        <span class="coin-sum-digit">${sum}</span>
+      `;
+
+      // 爻象
+      const yaoEmoji = yaoResult.yao === 1 ? '⚊ 阳' : '⚋ 阴';
+      const changeNote = yaoResult.changing ? ' ⚡变爻' : '';
+      yaoResultDiv.innerHTML = `${yaoEmoji} · <span style="color:${yaoResult.changing ? '#9b3020' : 'var(--bronze-light)'}">${yaoResult.type}${changeNote}</span>`;
+
+      // 当前爻累积
+      currentYaoArray.push(yaoResult.yao);
+
+      resolve();
+    }, 1000); // 等待旋转动画完成
+  });
+}
+
 function animateBaguaSpin(yaoResult, yaoIndex) {
   return new Promise(resolve => {
     const disk = document.getElementById('baguaDisk');
@@ -1785,8 +2009,31 @@ async function startCasting() {
   document.getElementById('castingArea').classList.add('visible');
   document.getElementById('questionSection').style.opacity = '0.5';
 
+  const castingTitle = document.getElementById('castingTitle');
   const modeSwitch = document.getElementById('baguaModeSwitch');
-  modeSwitch.style.display = 'flex';
+  const coinArea = document.getElementById('coinCastingArea');
+  const scene3d = document.querySelector('.scene3d');
+  const linesProgress = document.getElementById('linesProgress');
+
+  // 铜钱法 vs 蓍草/梅花：不同动画
+  const isCoinMethod = currentMethod === 'coin';
+
+  if (isCoinMethod) {
+    // 铜钱法：隐藏阵盘，显示铜钱动画
+    castingTitle.textContent = '掷钱中…';
+    document.getElementById('castingSubtitle').textContent = '三枚铜钱 · 一掷一爻 · 六掷成卦';
+    modeSwitch.style.display = 'none';
+    scene3d.style.display = 'none';
+    coinArea.classList.add('visible');
+    document.querySelector('.classical-quote').style.display = 'none';
+  } else {
+    // 蓍草/梅花：显示阵盘
+    castingTitle.textContent = '演卦中…';
+    document.getElementById('castingSubtitle').textContent = '初爻为基 · 上爻为末 · 自下而上成卦';
+    modeSwitch.style.display = 'flex';
+    scene3d.style.display = '';
+    coinArea.classList.remove('visible');
+  }
 
   // 重置
   currentYaoArray = [];
@@ -1796,7 +2043,7 @@ async function startCasting() {
   const yaoPop3d = document.getElementById('yaoPop3d');
   yaoPop3d.classList.remove('show');
   document.querySelectorAll('.gua-card-disk.highlight').forEach(n => n.classList.remove('highlight'));
-  document.getElementById('linesProgress').innerHTML = '';
+  linesProgress.innerHTML = '';
 
   // 显示古文旁白和步骤指示
   showClassicalQuote(currentMethod, 'start');
@@ -1824,8 +2071,12 @@ async function startCasting() {
       globalChangeIdx += 3;
     }
 
-    // 阵盘旋转 + 爻弹出
-    await animateBaguaSpin(result, i);
+    // 铜钱法：铜钱投掷动画；其他：阵盘旋转动画
+    if (isCoinMethod) {
+      await animateCoinToss(result, i);
+    } else {
+      await animateBaguaSpin(result, i);
+    }
 
     // 下方爻行
     const lineDiv = document.createElement('div');
@@ -1840,7 +2091,7 @@ async function startCasting() {
       </div>
       <span class="yao-type">${result.type}</span>
     `;
-    document.getElementById('linesProgress').appendChild(lineDiv);
+    linesProgress.appendChild(lineDiv);
     await sleep(200);
     lineDiv.classList.add('revealed');
     if (result.changing) {
@@ -1849,9 +2100,12 @@ async function startCasting() {
     await sleep(400);
   }
 
-  // 十八变完成
+  // 完成
   if (currentMethod === 'shicao') {
     showClassicalQuote('shicao', 'end');
+  } else if (currentMethod === 'coin') {
+    showClassicalQuote('coin', 'end');
+    document.getElementById('classicalQuote').style.display = 'block';
   } else {
     showClassicalQuote(currentMethod, 'end');
   }
@@ -1859,8 +2113,16 @@ async function startCasting() {
   document.querySelectorAll('#siyingDetail span').forEach(s => s.classList.remove('highlight-step'));
 
   await sleep(600);
-  finalBaguaRotation(yaoResults);
-  await sleep(1800);
+
+  if (!isCoinMethod) {
+    finalBaguaRotation(yaoResults);
+    await sleep(1800);
+  } else {
+    // 铜钱法也做一次最终阵盘定位展示
+    scene3d.style.display = '';
+    finalBaguaRotation(yaoResults);
+    await sleep(1800);
+  }
   showResult(yaoResults);
 }
 
@@ -2110,6 +2372,10 @@ function resetAll() {
   document.getElementById('linesProgress').innerHTML = '';
   document.getElementById('castBtn').disabled = false;
   document.getElementById('questionSection').style.opacity = '1';
+
+  // 恢复阵盘显示
+  document.querySelector('.scene3d').style.display = '';
+  document.getElementById('coinCastingArea').classList.remove('visible');
 
   // 隐藏模式切换
   const modeSwitch = document.getElementById('baguaModeSwitch');
