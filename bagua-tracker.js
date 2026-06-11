@@ -1,6 +1,6 @@
 /**
- * 八卦占卜 - 数据收集前端 SDK（纯前端 localStorage 方案）
- * 数据存储在用户浏览器本地，通过 /admin 面板查看
+ * 八卦占卜 - 数据收集前端 SDK
+ * 数据同时存储到 localStorage（本地备份）和 Supabase（云端汇总）
  */
 (function() {
   'use strict';
@@ -10,6 +10,28 @@
   let visitStartTime = Date.now();
   let visitRecorded = false;
   let leaveRecorded = false;
+
+  // ===== Supabase 配置 =====
+  const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
+
+  async function supabaseInsert(table, record) {
+    try {
+      const resp = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(record)
+      });
+      if (!resp.ok) console.warn('Supabase insert failed:', table, resp.status);
+    } catch(e) {
+      console.warn('Supabase network error:', e.message);
+    }
+  }
 
   // ===== 浏览器/设备检测 =====
   function detectBrowser(ua) {
@@ -37,7 +59,7 @@
     return 'Desktop';
   }
 
-  // ===== localStorage 存储 =====
+  // ===== localStorage 存储（本地备份） =====
   function loadData() {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { visits: [], divinations: [], leaves: [] };
@@ -46,13 +68,11 @@
 
   function saveData(data) {
     try {
-      // 限制最多保留 500 条记录
       if (data.visits.length > 500) data.visits = data.visits.slice(-500);
       if (data.divinations.length > 500) data.divinations = data.divinations.slice(-500);
       if (data.leaves.length > 500) data.leaves = data.leaves.slice(-500);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch(e) {
-      // localStorage 满了就清空旧的
       localStorage.removeItem(STORAGE_KEY);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e2) {}
     }
@@ -62,7 +82,7 @@
     return new Date().toISOString().replace('T', ' ').slice(0, 19);
   }
 
-  // 记录访问
+  // 记录访问（localStorage + Supabase）
   function recordVisit() {
     if (visitRecorded) return;
     visitRecorded = true;
@@ -78,9 +98,12 @@
       language: navigator.language,
       referrer: document.referrer || 'direct'
     };
+    // 本地存储
     const data = loadData();
     data.visits.push(record);
     saveData(data);
+    // 上报 Supabase
+    supabaseInsert('visits', record);
   }
 
   // 记录离开
@@ -98,16 +121,19 @@
     saveData(data);
   }
 
-  // 记录占卜
+  // 记录占卜（localStorage + Supabase）
   function recordDivination(info) {
     const record = {
       session_id: SESSION_ID,
       time: getTime(),
       ...info
     };
+    // 本地存储
     const data = loadData();
     data.divinations.push(record);
     saveData(data);
+    // 上报 Supabase
+    supabaseInsert('divinations', record);
   }
 
   // ===== 事件监听 =====
@@ -129,5 +155,5 @@
     recordLeave: recordLeave
   };
 
-  console.log('📊 八卦数据收集已就绪 | Session:', SESSION_ID);
+  console.log('📊 八卦数据收集已就绪 | Session:', SESSION_ID, '| Supabase: 已连接');
 })();

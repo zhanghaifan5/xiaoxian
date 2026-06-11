@@ -1954,6 +1954,20 @@ function showResult(yaoResults) {
   document.getElementById('castBtn').disabled = false;
   document.getElementById('questionSection').style.opacity = '1';
   isCasting = false;
+
+  // 上报占卜数据到 Supabase
+  if (window.BaguaTracker) {
+    window.BaguaTracker.recordDivination({
+      method: currentMethod,
+      question: question,
+      ben_gua_name: benGua.name,
+      ben_gua_upper: benGua.upper || '',
+      ben_gua_lower: benGua.lower || '',
+      bian_gua_name: benKey !== bianKey ? bianGua.name : '',
+      changing_lines: changingLines.length > 0 ? changingLines.join(',') : '',
+      yao_results: JSON.stringify(yaoResults.map(r => ({ yao: r.yao, changing: r.changing, type: r.type })))
+    });
+  }
 }
 
 // 渲染三爻卦象
@@ -2025,22 +2039,6 @@ function resetAll() {
   });
 
   isCasting = false;
-
-  // 上报占卜数据
-  if (window.BaguaTracker) {
-    window.BaguaTracker.recordDivination({
-      method: currentMethod,
-      question: question,
-      ben_gua_key: benKey,
-      ben_gua_name: benGua.name,
-      ben_gua_upper: benGua.upper || '',
-      ben_gua_lower: benGua.lower || '',
-      bian_gua_key: benKey !== bianKey ? bianKey : '',
-      bian_gua_name: benKey !== bianKey ? bianGua.name : '',
-      changing_lines: changingLines.length > 0 ? changingLines.join(',') : '',
-      yao_results: JSON.stringify(yaoResults.map(r => ({ yao: r.yao, changing: r.changing, type: r.type })))
-    });
-  }
 }
 </script>
 
