@@ -82,6 +82,35 @@
     return new Date().toISOString().replace('T', ' ').slice(0, 19);
   }
 
+  // GPS 精确定位缓存（由 startCasting 触发）
+  let gpsCoords = null;
+
+  // 浏览器精确定位（GPS/WiFi/基站，5-50米精度）
+  async function requestGps() {
+    if (gpsCoords) return gpsCoords;
+    if (!navigator.geolocation) return null;
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 0
+        });
+      });
+      gpsCoords = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy),
+        source: 'gps'
+      };
+      console.log('📍 GPS定位成功 精度:', gpsCoords.accuracy + 'm');
+      return gpsCoords;
+    } catch(e) {
+      console.warn('GPS定位被拒绝或失败，回退到IP定位');
+      return null;
+    }
+  }
+
   // IP 地理位置查询（免费 API，无需 Key）
   async function fetchGeo() {
     try {
@@ -114,6 +143,12 @@
     const ua = navigator.userAgent;
     const geo = await fetchGeo();
 
+    // GPS 优先：如果已有 GPS 坐标，覆盖 IP 坐标
+    const lat = gpsCoords ? gpsCoords.latitude : (geo ? geo.latitude : null);
+    const lng = gpsCoords ? gpsCoords.longitude : (geo ? geo.longitude : null);
+    const accuracy = gpsCoords ? gpsCoords.accuracy : null;
+    const geoSource = gpsCoords ? 'gps' : 'ip';
+
     const record = {
       session_id: SESSION_ID,
       time: getTime(),
@@ -130,8 +165,10 @@
       region: geo ? geo.region : '',
       city: geo ? geo.city : '',
       isp: geo ? geo.isp : '',
-      latitude: geo ? geo.latitude : null,
-      longitude: geo ? geo.longitude : null,
+      latitude: lat,
+      longitude: lng,
+      accuracy: accuracy,
+      geo_source: geoSource,
       timezone: geo ? geo.timezone : ''
     };
     // 本地存储
@@ -188,7 +225,8 @@
     getSessionId: function() { return SESSION_ID; },
     recordDivination: recordDivination,
     recordVisit: recordVisit,
-    recordLeave: recordLeave
+    recordLeave: recordLeave,
+    requestGps: requestGps
   };
 
   console.log('📊 八卦数据收集已就绪 | Session:', SESSION_ID, '| Supabase: 已连接');

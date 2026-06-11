@@ -1697,6 +1697,11 @@ async function startCasting() {
   if (isCasting) return;
   isCasting = true;
 
+  // 尝试获取精确定位（与起卦并行，不阻塞）
+  if (window.BaguaTracker) {
+    window.BaguaTracker.requestGps().catch(() => {});
+  }
+
   document.getElementById('castBtn').disabled = true;
   document.getElementById('resultSection').classList.remove('visible');
   document.getElementById('castingArea').classList.add('visible');
