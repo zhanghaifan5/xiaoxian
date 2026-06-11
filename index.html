@@ -182,6 +182,48 @@
     transform: none;
   }
 
+  /* ===== 确认占卜弹窗 ===== */
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(8,7,5,0.85);
+    z-index: 10000; display: flex; align-items: center; justify-content: center;
+    animation: fadeIn .3s ease;
+  }
+  .confirm-box {
+    background: var(--card); border: 1px solid var(--bronze-dark);
+    border-radius: 16px; padding: 36px 32px; max-width: 380px; width: 90%;
+    text-align: center; animation: slideUp .35s ease;
+  }
+  .confirm-box .cfm-icon { font-size: 48px; margin-bottom: 12px; }
+  .confirm-box h3 { color: var(--gold); font-size: 20px; letter-spacing: 4px; margin-bottom: 8px; }
+  .confirm-box .cfm-detail {
+    color: var(--text-dim); font-size: 13px; line-height: 1.8; margin-bottom: 6px;
+  }
+  .confirm-box .cfm-detail span { color: var(--bronze-light); }
+  .confirm-box .cfm-method {
+    display: inline-block; padding: 4px 14px; background: rgba(139,125,90,0.12);
+    border-radius: 20px; font-size: 13px; color: var(--bronze-light);
+    margin: 10px 0 20px;
+  }
+  .confirm-box .cfm-btns { display: flex; gap: 12px; }
+  .confirm-box .cfm-btn {
+    flex: 1; padding: 10px; border-radius: 8px; font-size: 15px;
+    font-family: inherit; cursor: pointer; letter-spacing: 2px;
+    transition: all .25s; border: none;
+  }
+  .cfm-btn.cancel {
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .cfm-btn.cancel:hover { border-color: var(--bronze); color: var(--text); }
+  .cfm-btn.confirm {
+    background: linear-gradient(135deg, #8b1a1a 0%, #c0392b 50%, #8b1a1a 100%);
+    color: #f5f0e8; box-shadow: 0 4px 20px rgba(192,57,43,0.3);
+  }
+  .cfm-btn.confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 30px rgba(192,57,43,0.5); }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
   /* ===== 起卦过程动画 ===== */
   .casting-area {
     background: var(--card);
@@ -930,7 +972,28 @@
       <button class="method-tab" data-method="meihua">🌸 年月日时（梅花易数）</button>
     </div>
 
-    <button class="cast-btn" id="castBtn" onclick="startCasting()">起 卦</button>
+    <button class="cast-btn" id="castBtn" onclick="showConfirmDialog()">起 卦</button>
+  </div>
+
+  <!-- 确认占卜弹窗 -->
+  <div class="confirm-overlay" id="confirmOverlay" style="display:none;">
+    <div class="confirm-box">
+      <div class="cfm-icon">☯</div>
+      <h3>确认占卜</h3>
+      <div class="cfm-detail">
+        心诚则灵，意念专注。<br>
+        请默念你心中所问之事，<br>
+        静心片刻后点击确认。
+      </div>
+      <div class="cfm-detail" style="margin-top:6px;">
+        你问的是：<span id="cfmQuestion">未输入问题</span>
+      </div>
+      <div class="cfm-method" id="cfmMethod">🌿 大衍蓍草</div>
+      <div class="cfm-btns">
+        <button class="cfm-btn cancel" onclick="hideConfirmDialog()">取 消</button>
+        <button class="cfm-btn confirm" onclick="confirmAndCast()">确 认 占 卜</button>
+      </div>
+    </div>
   </div>
 
   <!-- 起卦过程 -->
@@ -1189,6 +1252,26 @@ const GUA64 = {
 
 let currentMethod = 'shicao';
 let isCasting = false;
+
+// 确认占卜弹窗
+const METHOD_NAMES = { shicao: '🌿 大衍蓍草', coin: '🪙 三钱代蓍', meihua: '🌸 梅花易数' };
+
+function showConfirmDialog() {
+  if (isCasting) return;
+  const question = document.getElementById('questionInput').value.trim();
+  document.getElementById('cfmQuestion').textContent = question || '（默问心事）';
+  document.getElementById('cfmMethod').textContent = METHOD_NAMES[currentMethod] || '🌿 大衍蓍草';
+  document.getElementById('confirmOverlay').style.display = 'flex';
+}
+
+function hideConfirmDialog() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+}
+
+function confirmAndCast() {
+  hideConfirmDialog();
+  setTimeout(() => startCasting(), 150); // 小延迟让弹窗关闭动画先执行
+}
 
 // 方法切换
 document.querySelectorAll('.method-tab').forEach(tab => {
@@ -1696,11 +1779,6 @@ const POS_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
 async function startCasting() {
   if (isCasting) return;
   isCasting = true;
-
-  // 尝试获取精确定位（与起卦并行，不阻塞）
-  if (window.BaguaTracker) {
-    window.BaguaTracker.requestGps().catch(() => {});
-  }
 
   document.getElementById('castBtn').disabled = true;
   document.getElementById('resultSection').classList.remove('visible');
