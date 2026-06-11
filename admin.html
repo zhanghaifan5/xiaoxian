@@ -166,6 +166,15 @@ async function supabaseQuery(table, select, opts) {
   return resp.json();
 }
 
+// 将 Supabase 时间字符串转为北京时间显示
+// Supabase 存的是 UTC+0 的 ISO 格式字符串（如 "2026-06-11 09:30:00"），需要 +8 小时
+function toBeijingTime(timeStr) {
+  if (!timeStr) return '';
+  const d = new Date(timeStr.replace(' ', 'T') + '+00:00');
+  const bj = new Date(d.getTime() + 8 * 3600000);
+  return bj.toISOString().replace('T', ' ').slice(0, 19);
+}
+
 function toggleMode() {
   currentMode = currentMode === 'full' ? 'compact' : 'full';
   document.getElementById('modeBtn').textContent = currentMode === 'full' ? '📊 紧凑视图' : '📊 展开视图';
@@ -285,9 +294,10 @@ function render(visits, divinations) {
     }
     // 时段
     if (d.time) {
-      const h = new Date(d.time.replace(' ','T') + '+08:00').getHours();
+      const bjTime = toBeijingTime(d.time);
+      const h = new Date(bjTime.replace(' ','T')).getHours();
       hourCounts[h] = (hourCounts[h]||0)+1;
-      const wd = new Date(d.time.replace(' ','T') + '+08:00').getDay();
+      const wd = new Date(bjTime.replace(' ','T')).getDay();
       weekdayCounts[wd] = (weekdayCounts[wd]||0)+1;
     }
     // 问题
@@ -504,7 +514,7 @@ function render(visits, divinations) {
       const question = d.question ? (d.question.length > 20 ? d.question.slice(0,20)+'…' : d.question) : '-';
       const hasChange = d.has_change || (d.bian_gua_name && d.bian_gua_name !== '');
       html += `<tr>
-        <td style="white-space:nowrap">${(d.time||'').slice(0,16)}</td>
+        <td style="white-space:nowrap">${toBeijingTime(d.time).slice(0,16)}</td>
         <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
         <td style="color:${hasChange?'var(--gold-light)':'var(--text-dim)'}">${hasChange?(d.bian_gua_name||'?') : '—'}</td>
         <td>${mNames[d.method]||d.method||''}</td>
@@ -522,7 +532,7 @@ function render(visits, divinations) {
     html += '<tr><th>时间</th><th>Session</th><th>IP</th><th>国家</th><th>地区</th><th>城市</th><th>ISP</th><th>浏览器</th><th>系统</th><th>设备</th></tr>';
     visits.slice(0, 50).forEach(v=>{
       html += `<tr>
-        <td style="white-space:nowrap">${(v.time||'').slice(0,16)}</td>
+        <td style="white-space:nowrap">${toBeijingTime(v.time).slice(0,16)}</td>
         <td style="font-size:11px;color:var(--text-dim)">${(v.session_id||'').slice(-10)}</td>
         <td style="font-size:11px;color:var(--text-dim);max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${v.ip||''}">${v.ip||'—'}</td>
         <td>${v.country||'—'}</td>
@@ -541,11 +551,11 @@ function render(visits, divinations) {
   // 按日期统计访问和占卜
   const dailyVisits = {}, dailyDivs = {};
   visits.forEach(v => {
-    const day = (v.time||'').slice(0,10);
+    const day = toBeijingTime(v.time).slice(0,10);
     if (day) dailyVisits[day] = (dailyVisits[day]||0)+1;
   });
   divinations.forEach(d => {
-    const day = (d.time||'').slice(0,10);
+    const day = toBeijingTime(d.time).slice(0,10);
     if (day) dailyDivs[day] = (dailyDivs[day]||0)+1;
   });
   const allDays = new Set([...Object.keys(dailyVisits), ...Object.keys(dailyDivs)]);
@@ -611,7 +621,7 @@ function renderCompact(visits, divinations, ctx) {
     divinations.slice(0, 30).forEach(d=>{
       const question = d.question ? (d.question.length > 15 ? d.question.slice(0,15)+'…' : d.question) : '-';
       h += `<tr>
-        <td style="white-space:nowrap">${(d.time||'').slice(0,16)}</td>
+        <td style="white-space:nowrap">${toBeijingTime(d.time).slice(0,16)}</td>
         <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
         <td>${d.bian_gua_name||'—'}</td>
         <td>${d.changing_lines||'无'}</td>
