@@ -96,6 +96,41 @@
   .lock-box .lock-btn:hover { opacity:0.85; }
   .lock-box .lock-err { color:#c44; font-size:12px; margin-top:10px; min-height:18px; }
   .lock-hidden { display:none !important; }
+
+  /* 折线图 */
+  .chart-wrap { position:relative; width:100%; }
+  .chart-wrap canvas { width:100%; height:260px; display:block; }
+  .chart-legend { display:flex; gap:20px; justify-content:center; margin-top:8px; font-size:12px; }
+  .chart-legend span { display:flex; align-items:center; gap:6px; }
+  .chart-legend .dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+
+  /* 热力图 */
+  .heatmap-wrap { overflow-x:auto; }
+  .heatmap-grid { display:grid; gap:1px; }
+  .heatmap-cell { aspect-ratio:1; border-radius:2px; cursor:pointer; transition:transform .15s; position:relative; }
+  .heatmap-cell:hover { transform:scale(1.4); z-index:2; }
+  .heatmap-tooltip { display:none; position:fixed; background:#1a1712; border:1px solid var(--gold); border-radius:6px; padding:8px 12px; font-size:12px; color:var(--text); z-index:999; pointer-events:none; white-space:nowrap; }
+  .heatmap-axis { display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:4px; }
+  .heatmap-label { font-size:10px; color:var(--text-dim); writing-mode:vertical-lr; text-orientation:mixed; }
+
+  /* 异常标记 */
+  .anomaly-row { background:rgba(200,80,50,0.12) !important; }
+  .anomaly-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:rgba(200,80,50,0.25); color:#e87a5a; }
+
+  /* 导出按钮 */
+  .export-btn { background:var(--jade); color:#0d0c09; border:none; padding:6px 16px; border-radius:6px; font-size:13px; cursor:pointer; font-family:inherit; font-weight:bold; }
+  .export-btn:hover { opacity:0.85; }
+
+  /* 在线人数 */
+  .online-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#5a8a6a; margin-right:6px; animation:pulse-online 2s infinite; }
+  @keyframes pulse-online { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* 动爻位置 */
+  .yao-pos-grid { display:flex; gap:4px; align-items:flex-end; height:120px; justify-content:center; }
+  .yao-pos-col { flex:1; max-width:60px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+  .yao-pos-bar { width:100%; background:linear-gradient(180deg,var(--gold),#5a4530); border-radius:3px 3px 0 0; transition:height .5s; }
+  .yao-pos-label { font-size:11px; color:var(--text-dim); margin-top:6px; }
+  .yao-pos-count { font-size:12px; color:var(--gold-light); }
 </style>
 </head>
 <body>
@@ -117,6 +152,7 @@
 <div class="nav">
   <button onclick="refresh()" class="active" id="refreshBtn">🔄 刷新数据</button>
   <button onclick="toggleMode()" id="modeBtn">📊 切换视图</button>
+  <button onclick="exportCSV()" class="export-btn">📥 导出CSV</button>
   <a href="index.html">🏠 返回首页</a>
 </div>
 <div id="app"><div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div></div>
@@ -330,7 +366,39 @@ function render(visits, divinations) {
   const changeRate = divinations.length ? ((withChange / divinations.length)*100).toFixed(0) : '0';
   html += `<div class="card"><div class="num">${changeRate}%</div><div class="label">🔄 有变爻比例</div></div>`;
   html += `<div class="card"><div class="num">${Object.keys(guaCounts).length}</div><div class="label">📚 覆盖卦象数</div><div class="sub">/ 64</div></div>`;
+  // 实时在线
+  const onlineCount = countOnline(visits);
+  html += `<div class="card"><div class="num"><span class="online-dot"></span>${onlineCount}</div><div class="label">🟢 近5分钟在线</div></div>`;
   html += '</div>';
+
+  // ==================== 每日趋势折线图（Canvas） ====================
+  const dailyVisits = {}, dailyDivs = {};
+  visits.forEach(v => {
+    const day = toBeijingTime(v.time).slice(0,10);
+    if (day) dailyVisits[day] = (dailyVisits[day]||0)+1;
+  });
+  divinations.forEach(d => {
+    const day = toBeijingTime(d.time).slice(0,10);
+    if (day) dailyDivs[day] = (dailyDivs[day]||0)+1;
+  });
+  const allDays = new Set([...Object.keys(dailyVisits), ...Object.keys(dailyDivs)]);
+  const sortedDays = [...allDays].sort();
+  if (sortedDays.length) {
+    html += '<div class="section"><h2>📈 每日趋势折线图</h2>';
+    html += `<div class="chart-wrap"><canvas id="trendChart" data-days="${sortedDays.join(',')}" data-visits="${sortedDays.map(d=>dailyVisits[d]||0).join(',')}" data-divs="${sortedDays.map(d=>dailyDivs[d]||0).join(',')}"></canvas></div>`;
+    html += '<div class="chart-legend"><span><span class="dot" style="background:var(--gold-light)"></span>访问量</span><span><span class="dot" style="background:var(--jade)"></span>占卜量</span></div>';
+    html += '</div>';
+  }
+
+  // ==================== 用户留存分析 ====================
+  const retentionData = analyzeRetention(visits, divinations);
+  html += '<div class="section"><h2>👥 用户留存分析</h2>';
+  html += '<div class="pie-grid">';
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.returnRate}%</div><div class="pie-name">🔁 回头客比例</div><div class="pie-pct">${retentionData.returnUsers}/${retentionData.totalUsers} 人</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.avgVisitsPerUser}</div><div class="pie-name">📊 人均回访次数</div><div class="pie-pct">中位数: ${retentionData.medianVisits}</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.avgInterval}</div><div class="pie-name">⏱ 平均间隔</div><div class="pie-pct">天（回访用户间）</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.onceOnly}</div><div class="pie-name">🕐 仅访问一次</div><div class="pie-pct">${((retentionData.onceOnly/retentionData.totalUsers)*100).toFixed(0)}%</div></div>`;
+  html += '</div></div>';
 
   // ==================== 爻型分布（老阳/老阴/少阳/少阴） ====================
   const totalYao = Object.values(yaoTypeCounts).reduce((a,b)=>a+b,0);
@@ -595,7 +663,114 @@ function render(visits, divinations) {
     html += '</div></div>';
   }
 
+  // ==================== 最热门问题原文 TOP20 ====================
+  if (questions.length) {
+    html += '<div class="section"><h2>💬 最热门问题原文 TOP20</h2><div class="recent" style="max-height:400px"><table>';
+    html += '<tr><th>#</th><th>问题</th><th>时间</th><th>卦象</th></tr>';
+    const qSorted = questions.slice().sort((a,b) => b.q.length - a.q.length ? 0 : 0);
+    // 按问题文本去重，取最近的时间
+    const qMap = {};
+    questions.forEach(q => {
+      if (!qMap[q.q] || q.time > qMap[q.q].time) qMap[q.q] = q;
+    });
+    const uniqueQuestions = Object.values(qMap).sort((a,b) => {
+      // 按问题长度降序（长问题通常更有意义）同时按时间
+      const scoreA = (qMap[a.q] ? Object.keys(qMap).filter(k=>k===a.q).length : 1);
+      return b.q.length - a.q.length;
+    }).slice(0, 20);
+    uniqueQuestions.forEach((q,i) => {
+      html += `<tr><td>${i+1}</td><td class="qtext" style="max-width:400px" title="${q.q}">${q.q}</td><td style="white-space:nowrap;font-size:11px;color:var(--text-dim)">${toBeijingTime(q.time).slice(0,16)}</td><td style="color:var(--gold-light)">${q.gua||'?'}</td></tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
+  // ==================== 动爻位置分布（初爻到上爻） ====================
+  const yaoPosCounts = {1:0,2:0,3:0,4:0,5:0,6:0};
+  divinations.forEach(d => {
+    if (d.changing_lines) {
+      const lines = String(d.changing_lines).split(',').filter(x=>x!=='').map(Number);
+      lines.forEach(l => { if (l>=1 && l<=6) yaoPosCounts[l]++; });
+    }
+  });
+  const totalPosChanges = Object.values(yaoPosCounts).reduce((a,b)=>a+b,0);
+  if (totalPosChanges > 0) {
+    html += '<div class="section"><h2>📍 动爻位置分布（初爻→上爻）</h2>';
+    const maxPos = Math.max(1, ...Object.values(yaoPosCounts));
+    html += '<div class="yao-pos-grid">';
+    const posNames = ['初爻','二爻','三爻','四爻','五爻','上爻'];
+    [1,2,3,4,5,6].forEach(i => {
+      const v = yaoPosCounts[i]||0;
+      const pct = Math.max(6, (v/maxPos)*100);
+      html += `<div class="yao-pos-col"><div class="yao-pos-count">${v}</div><div class="yao-pos-bar" style="height:${pct}%"></div><div class="yao-pos-label">${posNames[i-1]}</div></div>`;
+    });
+    html += '</div>';
+    html += `<div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text-dim)">共 ${totalPosChanges} 次动爻（每爻位出现次数）</div>`;
+    html += '</div>';
+  }
+
+  // ==================== 本卦→变卦转换热力图 ====================
+  const heatmapData = {};
+  divinations.forEach(d => {
+    if (d.ben_gua_name && d.bian_gua_name && d.ben_gua_name !== d.bian_gua_name) {
+      const key = d.ben_gua_name + '|' + d.bian_gua_name;
+      heatmapData[key] = (heatmapData[key]||0)+1;
+    }
+  });
+  const allGuaNames = [...new Set([
+    ...Object.keys(guaCounts),
+    ...Object.keys(bianGuaCounts)
+  ])].sort();
+  if (allGuaNames.length > 0 && Object.keys(heatmapData).length > 0) {
+    html += '<div class="section"><h2>🔥 本卦→变卦转换热力图</h2>';
+    html += '<div class="heatmap-wrap"><div class="heatmap-grid" id="heatmapGrid" style="grid-template-columns:repeat(' + allGuaNames.length + ',1fr)">';
+    const maxHeat = Math.max(1, ...Object.values(heatmapData));
+    allGuaNames.forEach(ben => {
+      allGuaNames.forEach(bian => {
+        const v = heatmapData[ben+'|'+bian]||0;
+        const intensity = v / maxHeat;
+        const r = Math.round(26 + intensity * 174);
+        const g = Math.round(22 + intensity * 146);
+        const b = Math.round(18 + intensity * 58);
+        html += `<div class="heatmap-cell" style="background:rgb(${r},${g},${b})" data-ben="${ben}" data-bian="${bian}" data-val="${v}" onmouseenter="showHeatTooltip(event,this)" onmouseleave="hideHeatTooltip()"></div>`;
+      });
+    });
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:4px">';
+    html += '<span>← 变卦（横向）</span><span>本卦（纵向）↓</span></div>';
+    html += '</div></div>';
+  }
+
+  // ==================== 异常检测 ====================
+  const anomalies = detectAnomalies(divinations);
+  if (anomalies.length > 0) {
+    html += '<div class="section"><h2>⚠️ 异常检测（同 session 短时间大量占卜）</h2>';
+    html += '<div class="recent" style="max-height:350px"><table>';
+    html += '<tr><th>Session</th><th>占卜次数</th><th>时间跨度</th><th>平均间隔</th><th>涉及问题</th></tr>';
+    anomalies.forEach(a => {
+      html += `<tr class="anomaly-row">
+        <td style="font-size:11px;color:var(--text-dim)">${a.session_id.slice(-12)}</td>
+        <td><span class="anomaly-badge">${a.count}次</span></td>
+        <td>${a.duration}秒</td>
+        <td>${a.avgInterval}秒/次</td>
+        <td style="font-size:11px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.questions}">${a.questions}</td>
+      </tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
   app.innerHTML = html;
+
+  // ==================== 渲染 Canvas 折线图（需要在 DOM 插入后） ====================
+  const trendCanvas = document.getElementById('trendChart');
+  if (trendCanvas) drawTrendChart(trendCanvas);
+
+  // ==================== 热力图 Tooltip ====================
+  if (!document.getElementById('heatTooltip')) {
+    const tt = document.createElement('div');
+    tt.id = 'heatTooltip';
+    tt.className = 'heatmap-tooltip';
+    document.body.appendChild(tt);
+  }
 }
 
 // ===== 紧凑视图 =====
@@ -669,6 +844,271 @@ function buildBarSection(title, data, barW) {
   });
   h += '</table></div></div>';
   return h;
+}
+
+// ==================== 新功能函数 ====================
+
+// 实时在线人数（近5分钟内有活动的session）
+function countOnline(visits) {
+  const now = Date.now();
+  const fiveMinAgo = now - 5 * 60 * 1000;
+  const activeSessions = new Set();
+  visits.forEach(v => {
+    const t = parseTimeToMs(v.time);
+    if (t && t >= fiveMinAgo) activeSessions.add(v.session_id);
+  });
+  return activeSessions.size;
+}
+
+function parseTimeToMs(timeStr) {
+  if (!timeStr) return null;
+  const d = new Date(timeStr.replace(' ','T').includes('+') || timeStr.includes('Z') ? timeStr.replace(' ','T') : timeStr.replace(' ','T') + '+00:00');
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
+// 用户留存分析
+function analyzeRetention(visits, divinations) {
+  const sessionVisits = {};
+  visits.forEach(v => {
+    if (!sessionVisits[v.session_id]) sessionVisits[v.session_id] = { count:0, times:[] };
+    sessionVisits[v.session_id].count++;
+    const t = parseTimeToMs(v.time);
+    if (t) sessionVisits[v.session_id].times.push(t);
+  });
+  divinations.forEach(d => {
+    if (!sessionVisits[d.session_id]) sessionVisits[d.session_id] = { count:0, times:[] };
+    const t = parseTimeToMs(d.time);
+    if (t) sessionVisits[d.session_id].times.push(t);
+  });
+
+  const sessions = Object.entries(sessionVisits);
+  const totalUsers = sessions.length;
+  const returnUsers = sessions.filter(([_,v]) => v.count > 1).length;
+  const returnRate = totalUsers ? ((returnUsers/totalUsers)*100).toFixed(1) : '0';
+  const onceOnly = sessions.filter(([_,v]) => v.count === 1).length;
+
+  // 人均回访
+  const allCounts = sessions.map(([_,v]) => v.count);
+  const avgVisits = totalUsers ? (allCounts.reduce((a,b)=>a+b,0)/totalUsers).toFixed(1) : '0';
+  allCounts.sort((a,b)=>a-b);
+  const medianVisits = allCounts.length ? allCounts[Math.floor(allCounts.length/2)] : 0;
+
+  // 平均间隔天数
+  let totalIntervals = 0, intervalCount = 0;
+  sessions.forEach(([_,v]) => {
+    if (v.times.length >= 2) {
+      const sorted = v.times.sort((a,b)=>a-b);
+      for (let i=1; i<sorted.length; i++) {
+        totalIntervals += (sorted[i] - sorted[i-1]) / (86400000);
+        intervalCount++;
+      }
+    }
+  });
+  const avgInterval = intervalCount ? totalIntervals/intervalCount : 0;
+
+  return {
+    totalUsers, returnUsers, returnRate, onceOnly,
+    avgVisitsPerUser: avgVisits, medianVisits,
+    avgInterval: avgInterval.toFixed(1) + '天'
+  };
+}
+
+// Canvas 每日趋势折线图
+function drawTrendChart(canvas) {
+  const days = canvas.dataset.days.split(',');
+  const visitsData = canvas.dataset.visits.split(',').map(Number);
+  const divsData = canvas.dataset.divs.split(',').map(Number);
+
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 260 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '260px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = 260;
+  const pad = { top: 20, right: 30, bottom: 50, left: 50 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  // 背景
+  ctx.fillStyle = '#0d0c09';
+  ctx.fillRect(0, 0, W, H);
+
+  const maxV = Math.max(1, ...visitsData, ...divsData);
+  const step = days.length > 1 ? cw / (days.length - 1) : cw;
+
+  // Y轴刻度
+  ctx.strokeStyle = '#2e2820';
+  ctx.lineWidth = 0.5;
+  for (let i=0; i<=4; i++) {
+    const y = pad.top + ch - (ch * i / 4);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px "Microsoft YaHei"';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(maxV * i / 4), pad.left - 8, y + 4);
+  }
+
+  // X轴标签
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#5a5040';
+  const xStep = Math.max(1, Math.floor(days.length / 12));
+  for (let i=0; i<days.length; i+=xStep) {
+    const x = pad.left + i * step;
+    ctx.fillText(days[i].slice(5), x, H - 10);
+  }
+
+  // 绘制折线
+  function drawLine(data, color, alpha) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((v,i) => {
+      const x = pad.left + i * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    // 填充
+    ctx.lineTo(pad.left + (data.length-1)*step, pad.top + ch);
+    ctx.lineTo(pad.left, pad.top + ch);
+    ctx.closePath();
+    ctx.fillStyle = color.replace('1)', alpha + ')').replace('rgb','rgba');
+    ctx.fill();
+  }
+  drawLine(divsData, 'rgb(90,138,106)', 0.15);
+  drawLine(visitsData, 'rgb(200,168,76)', 0.1);
+  drawLine(divsData, 'rgb(90,138,106)', 0.15); // re-draw line on top
+  drawLine(visitsData, 'rgb(200,168,76)', 0.1);
+
+  // 重新画线（无填充）
+  [visitsData, divsData].forEach((data,i) => {
+    const color = i===0 ? '#c9a84c' : '#5a8a6a';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((v,j) => {
+      const x = pad.left + j * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      if (j===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  });
+
+  // 数据点
+  [visitsData, divsData].forEach((data,i) => {
+    const color = i===0 ? '#c9a84c' : '#5a8a6a';
+    data.forEach((v,j) => {
+      if (v===0) return;
+      const x = pad.left + j * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI*2);
+      ctx.fill();
+    });
+  });
+}
+
+// 热力图 Tooltip
+function showHeatTooltip(e, cell) {
+  const tt = document.getElementById('heatTooltip');
+  tt.textContent = `${cell.dataset.ben} → ${cell.dataset.bian}: ${cell.dataset.val}次`;
+  tt.style.display = 'block';
+  tt.style.left = (e.clientX + 12) + 'px';
+  tt.style.top = (e.clientY - 30) + 'px';
+}
+function hideHeatTooltip() {
+  const tt = document.getElementById('heatTooltip');
+  if (tt) tt.style.display = 'none';
+}
+
+// 异常检测：同一 session 在短时间内大量占卜
+function detectAnomalies(divinations) {
+  const sessionGroups = {};
+  divinations.forEach(d => {
+    if (!sessionGroups[d.session_id]) sessionGroups[d.session_id] = [];
+    const t = parseTimeToMs(d.time);
+    sessionGroups[d.session_id].push({ time: t, question: d.question, gua: d.ben_gua_name });
+  });
+
+  const results = [];
+  Object.entries(sessionGroups).forEach(([sid, items]) => {
+    if (items.length < 5) return; // 至少5次占卜
+    const sorted = items.filter(x=>x.time).sort((a,b)=>a.time-b.time);
+    if (sorted.length < 5) return;
+    const duration = (sorted[sorted.length-1].time - sorted[0].time) / 1000; // 秒
+    if (duration <= 0) return;
+    const avgInterval = (duration / (sorted.length - 1)).toFixed(1);
+    // 阈值：60秒内5次以上视为异常
+    if (duration <= 60 || (sorted.length >= 10 && duration <= 300)) {
+      results.push({
+        session_id: sid,
+        count: sorted.length,
+        duration: Math.round(duration),
+        avgInterval: avgInterval,
+        questions: sorted.map(x=>x.question||'(空)').join(' | ')
+      });
+    }
+  });
+
+  results.sort((a,b) => b.count - a.count);
+  return results.slice(0, 20);
+}
+
+// 导出 CSV
+function exportCSV() {
+  // 需要从 Supabase 重新获取最新数据
+  const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
+  const headers_v = ['session_id','time','browser','os','device','screen_size','language','referrer','ip','country','region','city','isp','timezone'];
+  const headers_d = ['session_id','time','method','ben_gua_name','ben_gua_key','ben_gua_upper','ben_gua_lower','bian_gua_name','bian_gua_key','changing_lines','change_count','has_change','yao_results','question'];
+
+  async function fetchAll() {
+    const vUrl = SUPABASE_URL + '/rest/v1/visits?select=*&order=time.desc&limit=5000';
+    const dUrl = SUPABASE_URL + '/rest/v1/divinations?select=*&order=time.desc&limit=5000';
+    const [vResp, dResp] = await Promise.all([
+      fetch(vUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }),
+      fetch(dUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } })
+    ]);
+    const visits = await vResp.json();
+    const divinations = await dResp.json();
+
+    function toCSV(rows, headers) {
+      const lines = [headers.join(',')];
+      rows.forEach(row => {
+        const vals = headers.map(h => {
+          let v = row[h];
+          if (v === null || v === undefined) return '';
+          v = String(v).replace(/"/g,'""');
+          return '"' + v + '"';
+        });
+        lines.push(vals.join(','));
+      });
+      return lines.join('\n');
+    }
+
+    const csv_v = toCSV(visits, headers_v);
+    const csv_d = toCSV(divinations, headers_d);
+    const blob_v = new Blob(['\uFEFF' + csv_v], { type: 'text/csv;charset=utf-8' });
+    const blob_d = new Blob(['\uFEFF' + csv_d], { type: 'text/csv;charset=utf-8' });
+
+    const now = new Date().toISOString().slice(0,10);
+    ['visits', 'divinations'].forEach((name, i) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(i===0 ? blob_v : blob_d);
+      a.download = `bagua_${name}_${now}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  }
+  fetchAll().catch(e => alert('导出失败: ' + e.message));
 }
 
 document.addEventListener('DOMContentLoaded', refresh);
