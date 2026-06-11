@@ -654,31 +654,6 @@ function render(visits, divinations, lunar) {
     html += '</table></div></div>';
   }
 
-  // ==================== 访问活跃度 ====================
-  // 按日期统计访问和占卜
-  const dailyVisits = {}, dailyDivs = {};
-  visits.forEach(v => {
-    const day = toBeijingTime(v.time).slice(0,10);
-    if (day) dailyVisits[day] = (dailyVisits[day]||0)+1;
-  });
-  divinations.forEach(d => {
-    const day = toBeijingTime(d.time).slice(0,10);
-    if (day) dailyDivs[day] = (dailyDivs[day]||0)+1;
-  });
-  const allDays = new Set([...Object.keys(dailyVisits), ...Object.keys(dailyDivs)]);
-  const sortedDays = [...allDays].sort().slice(-14); // 最近14天
-  if (sortedDays.length) {
-    html += '<div class="section"><h2>📅 最近14天活跃度趋势</h2>';
-    html += '<table><tr><th>日期</th><th>访问量</th><th>占卜量</th><th>转化率</th></tr>';
-    sortedDays.forEach(day => {
-      const vc = dailyVisits[day]||0;
-      const dc = dailyDivs[day]||0;
-      const rate = vc ? ((dc/vc)*100).toFixed(0) : '0';
-      html += `<tr><td>${day}</td><td>${vc}</td><td>${dc}</td><td>${rate}%</td></tr>`;
-    });
-    html += '</table></div>';
-  }
-
   // ==================== 热门问题 ====================
   if (questions.length) {
     html += '<div class="section"><h2>💬 热门问题词频</h2><div class="trigram-list">';
