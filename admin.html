@@ -235,23 +235,54 @@ function render(visits, divinations) {
   const hourCounts = {};
   const weekdayCounts = {};
   const questions = [];
+  // 新增统计
+  const yaoTypeCounts = { '少阳':0, '少阴':0, '老阳':0, '老阴':0 }; // 爻型分布
+  const upperLowerPairs = {}; // 上下卦配对
+  const benGuaCountsByKey = {}; // 按六爻键值的本卦分布
+  const methodWithChange = {}; // 各方法的变爻率
 
   divinations.forEach(d => {
     // 方法
-    if (d.method) methodCounts[d.method] = (methodCounts[d.method]||0)+1;
+    if (d.method) {
+      methodCounts[d.method] = (methodCounts[d.method]||0)+1;
+      if (!methodWithChange[d.method]) methodWithChange[d.method] = { total:0, changed:0 };
+      methodWithChange[d.method].total++;
+    }
     // 本卦
     if (d.ben_gua_name) guaCounts[d.ben_gua_name] = (guaCounts[d.ben_gua_name]||0)+1;
-    if (d.ben_gua_key) benGuaKeys[d.ben_gua_key] = (benGuaKeys[d.ben_gua_key]||0)+1;
+    if (d.ben_gua_key) {
+      benGuaKeys[d.ben_gua_key] = (benGuaKeys[d.ben_gua_key]||0)+1;
+      benGuaCountsByKey[d.ben_gua_key] = (benGuaCountsByKey[d.ben_gua_key]||0)+1;
+    }
     // 变卦
     if (d.bian_gua_name) bianGuaCounts[d.bian_gua_name] = (bianGuaCounts[d.bian_gua_name]||0)+1;
     // 上卦/下卦
     if (d.ben_gua_upper) upperTrigrams[d.ben_gua_upper] = (upperTrigrams[d.ben_gua_upper]||0)+1;
     if (d.ben_gua_lower) lowerTrigrams[d.ben_gua_lower] = (lowerTrigrams[d.ben_gua_lower]||0)+1;
+    // 上下卦配对
+    if (d.ben_gua_upper && d.ben_gua_lower) {
+      const pairKey = d.ben_gua_upper + '上·' + d.ben_gua_lower + '下';
+      upperLowerPairs[pairKey] = (upperLowerPairs[pairKey]||0)+1;
+    }
     // 动爻
     const cc = d.change_count !== null && d.change_count !== undefined ? d.change_count : (d.changing_lines ? d.changing_lines.split(',').filter(x=>x!=='').length : 0);
-    if (cc > 0) withChange++; else withoutChange++;
+    if (cc > 0) {
+      withChange++;
+      if (d.method && methodWithChange[d.method]) methodWithChange[d.method].changed++;
+    } else {
+      withoutChange++;
+    }
     if (changeLineCounts[cc] !== undefined) changeLineCounts[cc]++;
     else changeLineCounts[cc] = 1;
+    // 爻型统计（从 yao_results JSON 解析）
+    if (d.yao_results) {
+      try {
+        const yaoArr = JSON.parse(d.yao_results);
+        yaoArr.forEach(y => {
+          if (y.type && yaoTypeCounts[y.type] !== undefined) yaoTypeCounts[y.type]++;
+        });
+      } catch(e) {}
+    }
     // 时段
     if (d.time) {
       const h = new Date(d.time.replace(' ','T') + '+08:00').getHours();
@@ -283,6 +314,47 @@ function render(visits, divinations) {
   html += `<div class="card"><div class="num">${changeRate}%</div><div class="label">🔄 有变爻比例</div></div>`;
   html += `<div class="card"><div class="num">${Object.keys(guaCounts).length}</div><div class="label">📚 覆盖卦象数</div><div class="sub">/ 64</div></div>`;
   html += '</div>';
+
+  // ==================== 爻型分布（老阳/老阴/少阳/少阴） ====================
+  const totalYao = Object.values(yaoTypeCounts).reduce((a,b)=>a+b,0);
+  if (totalYao > 0) {
+    html += '<div class="section"><h2>☯ 爻型分布（六爻中每种爻出现的次数）</h2>';
+    html += '<div class="pie-grid">';
+    const yaoColors = { '少阳':'#c9a84c', '少阴':'#5a8a6a', '老阳':'#e74c3c', '老阴':'#3498db' };
+    const yaoIcons = { '少阳':'⚊', '少阴':'⚋', '老阳':'⚊○', '老阴':'⚋×' };
+    ['少阳','少阴','老阳','老阴'].forEach(type => {
+      const v = yaoTypeCounts[type]||0;
+      html += `<div class="pie-item"><div class="pie-num" style="color:${yaoColors[type]}">${yaoIcons[type]} ${v}</div><div class="pie-name">${type}</div><div class="pie-pct">${((v/totalYao)*100).toFixed(1)}%</div></div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // ==================== 各方法变爻率 ====================
+  const methodNames = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
+  if (Object.keys(methodWithChange).length) {
+    html += '<div class="section"><h2>🎯 各方法变爻率对比</h2><table>';
+    const mRateSorted = Object.entries(methodWithChange).sort((a,b) => {
+      const ra = a[1].total ? a[1].changed/a[1].total : 0;
+      const rb = b[1].total ? b[1].changed/b[1].total : 0;
+      return rb - ra;
+    });
+    mRateSorted.forEach(([k,v]) => {
+      const rate = v.total ? ((v.changed/v.total)*100).toFixed(0) : '0';
+      html += `<tr><td>${methodNames[k]||k}</td><td><div class="bar-wrap"><div class="bar warn" style="width:${Math.max(20,rate*2)}px"></div><span class="bar-count">${v.changed}/${v.total} 有变爻 (${rate}%)</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 上下卦配对 TOP ====================
+  const topPairs = sortByVal(upperLowerPairs).slice(0, 12);
+  if (topPairs.length) {
+    html += '<div class="section"><h2>☯ 本卦上下卦配对 TOP12</h2><table>';
+    const maxP = maxOf(topPairs);
+    topPairs.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxP)*220)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
 
   // ==================== 地理位置分布 ====================
   const countrySorted = sortByVal(countries);
@@ -354,15 +426,31 @@ function render(visits, divinations) {
   html += '</div>';
 
   // ==================== 占卜方法 ====================
-  const methodNames = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
+  const methodNames2 = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
   const methodSorted = sortByVal(methodCounts);
   if (methodSorted.length) {
     html += '<div class="section"><h2>🎯 占卜方法偏好</h2><table>';
     const maxM = maxOf(methodSorted);
     methodSorted.forEach(([k,v])=>{
-      html += `<tr><td>${methodNames[k]||k}</td><td><div class="bar-wrap"><div class="bar pct" style="width:${Math.max(20,(v/maxM)*180)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
+      html += `<tr><td>${methodNames2[k]||k}</td><td><div class="bar-wrap"><div class="bar pct" style="width:${Math.max(20,(v/maxM)*180)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
     });
     html += '</table></div>';
+  }
+
+  // ==================== 六爻键值分布（本卦） ====================
+  const topBenKeys = sortByVal(benGuaCountsByKey).slice(0, 12);
+  if (topBenKeys.length) {
+    html += '<div class="section"><h2>🔑 六爻键值 TOP12（本卦）</h2>';
+    html += '<div class="trigram-list" style="line-height:2">';
+    const maxBK = maxOf(topBenKeys);
+    topBenKeys.forEach(([key,count]) => {
+      // 找对应的卦名
+      const guaName = findGuaName(key);
+      const yaoDisplay = key.split('').map(c => c==='1'?'<span style="color:var(--gold-light)">⚊</span>':'<span style="color:var(--text-dim)">⚋</span>').join('');
+      const size = 13 + Math.floor((count/maxBK)*8);
+      html += `<span style="font-size:${size}px;margin:0 6px;display:inline-block;white-space:nowrap" title="${guaName}: ${count}次">${yaoDisplay} <span style="color:var(--gold-light);font-size:${size-2}px">${guaName||'?'}</span> <span style="color:var(--text-dim);font-size:11px">×${count}</span></span>`;
+    });
+    html += '</div></div>';
   }
 
   // ==================== 动爻统计 ====================
@@ -445,6 +533,31 @@ function render(visits, divinations) {
     html += '</table></div></div>';
   }
 
+  // ==================== 访问活跃度 ====================
+  // 按日期统计访问和占卜
+  const dailyVisits = {}, dailyDivs = {};
+  visits.forEach(v => {
+    const day = (v.time||'').slice(0,10);
+    if (day) dailyVisits[day] = (dailyVisits[day]||0)+1;
+  });
+  divinations.forEach(d => {
+    const day = (d.time||'').slice(0,10);
+    if (day) dailyDivs[day] = (dailyDivs[day]||0)+1;
+  });
+  const allDays = new Set([...Object.keys(dailyVisits), ...Object.keys(dailyDivs)]);
+  const sortedDays = [...allDays].sort().slice(-14); // 最近14天
+  if (sortedDays.length) {
+    html += '<div class="section"><h2>📅 最近14天活跃度趋势</h2>';
+    html += '<table><tr><th>日期</th><th>访问量</th><th>占卜量</th><th>转化率</th></tr>';
+    sortedDays.forEach(day => {
+      const vc = dailyVisits[day]||0;
+      const dc = dailyDivs[day]||0;
+      const rate = vc ? ((dc/vc)*100).toFixed(0) : '0';
+      html += `<tr><td>${day}</td><td>${vc}</td><td>${dc}</td><td>${rate}%</td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
   // ==================== 热门问题 ====================
   if (questions.length) {
     html += '<div class="section"><h2>💬 热门问题词频</h2><div class="trigram-list">';
@@ -504,6 +617,29 @@ function renderCompact(visits, divinations, ctx) {
     h += '</table></div></div>';
   }
   return h;
+}
+
+// 通过六爻键值查找卦名（如 "111000" → "地天泰"）
+function findGuaName(key) {
+  const map = {
+    '111111':'乾为天','000000':'坤为地','010001':'水雷屯','100010':'山水蒙',
+    '111010':'水天需','010111':'天水讼','010000':'地水师','000010':'水地比',
+    '111011':'风天小畜','110111':'天泽履','111000':'地天泰','000111':'天地否',
+    '101111':'天火同人','111101':'火天大有','001000':'地山谦','000100':'雷地豫',
+    '100110':'泽雷随','011001':'山风蛊','110000':'地泽临','000011':'风地观',
+    '100101':'火雷噬嗑','101001':'山火贲','000001':'山地剥','100000':'地雷复',
+    '100111':'天雷无妄','111001':'山天大畜','100001':'山雷颐','011110':'泽风大过',
+    '010010':'坎为水','101101':'离为火','001110':'泽山咸','110001':'雷风恒',
+    '001111':'天山遁','111100':'雷天大壮','000101':'火地晋','101000':'地火明夷',
+    '101011':'风火家人','110101':'火泽睽','001010':'水山蹇','010100':'雷水解',
+    '110001':'山泽损','100011':'风雷益','111110':'泽天夬','011111':'天风姤',
+    '000110':'泽地萃','011000':'地风升','010110':'泽水困','011010':'水风井',
+    '101110':'泽火革','011101':'火风鼎','001001':'震为雷','100100':'艮为山',
+    '001011':'风山渐','110100':'雷泽归妹','101100':'雷火丰','001101':'火山旅',
+    '011011':'巽为风','110110':'兑为泽','010011':'风水涣','110010':'水泽节',
+    '110011':'风泽中孚','001100':'雷山小过','010101':'水火既济','101010':'火水未济'
+  };
+  return map[key] || '';
 }
 
 function buildBarSection(title, data, barW) {
