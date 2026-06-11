@@ -82,11 +82,38 @@
     return new Date().toISOString().replace('T', ' ').slice(0, 19);
   }
 
+  // IP 地理位置查询（免费 API，无需 Key）
+  async function fetchGeo() {
+    try {
+      const resp = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+      if (!resp.ok) return null;
+      const d = await resp.json();
+      return {
+        ip: d.ip || '',
+        country: d.country_name || '',
+        country_code: d.country_code || '',
+        region: d.region || '',
+        city: d.city || '',
+        isp: d.org || '',
+        latitude: d.latitude || null,
+        longitude: d.longitude || null,
+        timezone: d.timezone || ''
+      };
+    } catch(e) {
+      console.warn('Geo lookup failed:', e.message);
+      return null;
+    }
+  }
+
   // 记录访问（localStorage + Supabase）
-  function recordVisit() {
+  async function recordVisit() {
     if (visitRecorded) return;
     visitRecorded = true;
+
+    // 并行：设备检测 + 地理位置查询
     const ua = navigator.userAgent;
+    const geo = await fetchGeo();
+
     const record = {
       session_id: SESSION_ID,
       time: getTime(),
@@ -96,7 +123,16 @@
       device: detectDevice(ua),
       screen_size: screen.width + 'x' + screen.height,
       language: navigator.language,
-      referrer: document.referrer || 'direct'
+      referrer: document.referrer || 'direct',
+      ip: geo ? geo.ip : '',
+      country: geo ? geo.country : '',
+      country_code: geo ? geo.country_code : '',
+      region: geo ? geo.region : '',
+      city: geo ? geo.city : '',
+      isp: geo ? geo.isp : '',
+      latitude: geo ? geo.latitude : null,
+      longitude: geo ? geo.longitude : null,
+      timezone: geo ? geo.timezone : ''
     };
     // 本地存储
     const data = loadData();

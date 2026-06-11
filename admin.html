@@ -158,6 +158,8 @@ function render(visits, divinations) {
 
   // 浏览器 / 设备 / 系统
   const browsers = {}, devices = {}, oses = {}, screenSizes = {}, languages = {}, referrers = {};
+  // 地理位置
+  const countries = {}, regions = {}, cities = {}, isps = {}, timezones = {};
   visits.forEach(v => {
     browsers[v.browser] = (browsers[v.browser]||0)+1;
     devices[v.device] = (devices[v.device]||0)+1;
@@ -166,6 +168,12 @@ function render(visits, divinations) {
     if (v.language) languages[v.language] = (languages[v.language]||0)+1;
     const ref = (v.referrer||'direct').split('/')[2] || v.referrer || 'direct';
     referrers[ref] = (referrers[ref]||0)+1;
+    // 地理
+    if (v.country) countries[v.country] = (countries[v.country]||0)+1;
+    if (v.region && v.country) regions[v.country + '|' + v.region] = (regions[v.country + '|' + v.region]||0)+1;
+    if (v.city && v.region) cities[v.region + '|' + v.city] = (cities[v.region + '|' + v.city]||0)+1;
+    if (v.isp) isps[v.isp] = (isps[v.isp]||0)+1;
+    if (v.timezone) timezones[v.timezone] = (timezones[v.timezone]||0)+1;
   });
 
   // 占卜统计
@@ -224,6 +232,31 @@ function render(visits, divinations) {
   html += `<div class="card"><div class="num">${changeRate}%</div><div class="label">🔄 有变爻比例</div></div>`;
   html += `<div class="card"><div class="num">${Object.keys(guaCounts).length}</div><div class="label">📚 覆盖卦象数</div><div class="sub">/ 64</div></div>`;
   html += '</div>';
+
+  // ==================== 地理位置分布 ====================
+  const countrySorted = sortByVal(countries);
+  if (countrySorted.length) {
+    html += '<div class="section"><h2>🌍 访客地理分布</h2>';
+    html += '<div class="row">';
+    html += buildBarSection('🗺 国家/地区', countries, 130);
+    const regionSorted = sortByVal(regions).slice(0, 10);
+    if (regionSorted.length) {
+      const regionObj = {};
+      regionSorted.forEach(([k,v]) => { const parts = k.split('|'); regionObj[parts[1] + ' (' + parts[0] + ')'] = v; });
+      html += buildBarSection('📍 省份/州 TOP10', regionObj, 130);
+    }
+    html += '</div>';
+    const citySorted = sortByVal(cities).slice(0, 12);
+    if (citySorted.length) {
+      html += '<div class="row">';
+      const cityObj = {};
+      citySorted.forEach(([k,v]) => { const parts = k.split('|'); cityObj[parts[1] + ' (' + parts[0] + ')'] = v; });
+      html += buildBarSection('🏙 城市 TOP12', cityObj, 130);
+      html += buildBarSection('📡 ISP 运营商', isps, 130);
+      html += '</div>';
+    }
+    html += '</div>';
+  }
 
   if (currentMode === 'compact') {
     html += renderCompact(visits, divinations, {browsers,devices,oses,methodCounts,guaCounts,bianGuaCounts,hourCounts,changeLineCounts,withChange,withoutChange,questions,upperTrigrams,lowerTrigrams,screenSizes,languages,referrers,weekdayCounts});
@@ -343,17 +376,19 @@ function render(visits, divinations) {
   // ==================== 最近访问 ====================
   if (visits.length) {
     html += '<div class="section"><h2>🌍 最近访问记录</h2><div class="recent"><table>';
-    html += '<tr><th>时间</th><th>Session</th><th>浏览器</th><th>系统</th><th>设备</th><th>屏幕</th><th>语言</th><th>来源</th></tr>';
+    html += '<tr><th>时间</th><th>Session</th><th>IP</th><th>国家</th><th>地区</th><th>城市</th><th>ISP</th><th>浏览器</th><th>系统</th><th>设备</th></tr>';
     visits.slice(0, 50).forEach(v=>{
       html += `<tr>
         <td style="white-space:nowrap">${(v.time||'').slice(0,16)}</td>
-        <td style="font-size:11px;color:var(--text-dim)">${(v.session_id||'').slice(-12)}</td>
+        <td style="font-size:11px;color:var(--text-dim)">${(v.session_id||'').slice(-10)}</td>
+        <td style="font-size:11px;color:var(--text-dim);max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${v.ip||''}">${v.ip||'—'}</td>
+        <td>${v.country||'—'}</td>
+        <td>${v.region||'—'}</td>
+        <td>${v.city||'—'}</td>
+        <td style="font-size:11px;color:var(--text-dim);max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${v.isp||''}">${v.isp||'—'}</td>
         <td>${v.browser||''}</td>
         <td>${v.os||''}</td>
         <td>${v.device||''}</td>
-        <td>${v.screen_size||''}</td>
-        <td>${v.language||''}</td>
-        <td style="color:var(--text-dim);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.referrer||''}">${(v.referrer||'direct').slice(0,30)}</td>
       </tr>`;
     });
     html += '</table></div></div>';
