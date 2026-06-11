@@ -79,7 +79,10 @@
   }
 
   function getTime() {
-    return new Date().toISOString().replace('T', ' ').slice(0, 19);
+    const d = new Date();
+    // 转为北京时间 UTC+8
+    const bj = new Date(d.getTime() + 8 * 3600000);
+    return bj.toISOString().replace('T', ' ').slice(0, 19);
   }
 
   // IP 地理位置查询（免费 API，无需 Key）
