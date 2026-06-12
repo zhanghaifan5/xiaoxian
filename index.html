@@ -868,6 +868,161 @@
     text-align: center;
   }
   .fun-card .fun-input:focus { border-color: var(--gold); }
+
+  /* ===== 六爻排盘表 ===== */
+  .liuyao-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 16px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .liuyao-table-title {
+    color: var(--gold);
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .liuyao-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 640px;
+  }
+  .liuyao-table th {
+    color: var(--bronze-light);
+    font-weight: 600;
+    padding: 10px 6px;
+    border-bottom: 2px solid var(--bronze-dark);
+    letter-spacing: 2px;
+    text-align: center;
+    background: rgba(139,125,90,0.06);
+    white-space: nowrap;
+  }
+  .liuyao-table td {
+    padding: 10px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+    line-height: 1.6;
+  }
+  .liuyao-table .yao-pos {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .liuyao-table .yao-symbol {
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+  .liuyao-table .yao-symbol.yang { color: #f0ead8; }
+  .liuyao-table .yao-symbol.yin { color: #6a6a8a; }
+  .liuyao-table .yao-symbol.changing {
+    position: relative;
+  }
+  .liuyao-table .yao-symbol.changing::after {
+    content: '○';
+    position: absolute;
+    right: -16px;
+    font-size: 10px;
+    color: var(--cinnabar);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .liuyao-table .yao-symbol.changing.yin::after {
+    content: '×';
+    color: var(--cinnabar);
+  }
+  .liuyao-table .shiyao-mark {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .liuyao-table .shiyao-mark.shi {
+    background: var(--cinnabar);
+    color: #fff;
+  }
+  .liuyao-table .shiyao-mark.ying {
+    background: var(--jade);
+    color: #fff;
+  }
+  .liuyao-table .liuqin-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .liuyao-table .liuqin-tag.fumu { background: rgba(100,149,237,0.2); color: #8eb8ff; }
+  .liuyao-table .liuqin-tag.guangui { background: rgba(155,48,32,0.2); color: #e07060; }
+  .liuyao-table .liuqin-tag.xiongdi { background: rgba(139,125,90,0.2); color: #c9a84c; }
+  .liuyao-table .liuqin-tag.qicai { background: rgba(90,138,106,0.2); color: #7ec892; }
+  .liuyao-table .liuqin-tag.zisun { background: rgba(138,90,138,0.2); color: #d090d0; }
+  .liuyao-table .yongshen-mark {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .liuyao-table .gong-info {
+    color: var(--bronze);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 12px;
+    letter-spacing: 2px;
+  }
+  .liuyao-table .gong-info span {
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+  .liuyao-question-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .liuyao-question-row select, .liuyao-question-row button {
+    padding: 6px 12px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .liuyao-question-row select:focus {
+    border-color: var(--gold);
+    outline: none;
+  }
+  .liuyao-question-row button {
+    background: rgba(212,168,75,0.12);
+    border-color: var(--bronze-dark);
+    letter-spacing: 1px;
+  }
+  .liuyao-question-row button:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  @media (max-width: 600px) {
+    .liuyao-table { font-size: 11px; min-width: auto; }
+    .liuyao-table th, .liuyao-table td { padding: 6px 3px; }
+  }
   .fun-card .fun-btn {
     padding: 8px 16px;
     background: rgba(212,168,75,0.12);
@@ -1588,6 +1743,8 @@
   <!-- 结果区 -->
   <div class="result-section" id="resultSection">
     <div class="gua-cards" id="guaCards"></div>
+    <!-- 六爻排盘区（在解读区之前显示） -->
+    <div id="liuyaoPaiPan"></div>
     <div class="interpretation" id="interpretation"></div>
     <button class="reset-btn" onclick="resetAll()">重新起卦</button>
   </div>
@@ -1788,6 +1945,144 @@ const GUA64 = {
   '010101': { name:'水火既济', upper:'坎', lower:'离', judge:'亨小，利贞。初吉终乱。', interpret:'既济卦象征已经成功。水在火上，烹饪之象。得此卦者，事情已经完成，但需防盛极而衰，保持警惕。', advice:'成功之后更要谨慎。守成比开创更难，居安思危。' },
   '101010': { name:'火水未济', upper:'离', lower:'坎', judge:'亨。小狐汔济，濡其尾。', interpret:'未济卦象征尚未完成。火在水上，不能相济。得此卦者，事情尚未完成，功亏一篑，需继续努力。', advice:'事情还没完成，不要半途而废。再坚持一下就能成功。' }
 };
+
+// ==================== 京房八宫卦体系（纳甲·世应·六亲·卦宫） ====================
+// 每卦的六爻纳支（初爻到上爻的地支）
+const NA_ZHI = {
+  // 八纯卦纳支（京房八宫首卦）
+  qian: ['子','寅','辰','午','申','戌'],  // 乾纳甲壬，内卦子寅辰，外卦午申戌
+  zhen: ['子','寅','辰','午','申','戌'],  // 震纳庚，同乾
+  kan:  ['寅','辰','午','申','戌','子'],  // 坎纳戊
+  gen:  ['辰','午','申','戌','子','寅'],  // 艮纳丙
+  kun:  ['未','巳','卯','丑','亥','酉'],  // 坤纳乙癸，内卦未巳卯，外卦丑亥酉
+  xun:  ['丑','亥','酉','未','巳','卯'],  // 巽纳辛
+  li:   ['卯','丑','亥','酉','未','巳'],  // 离纳己
+  dui:  ['巳','卯','丑','亥','酉','未'],  // 兑纳丁
+};
+
+// 八卦纳天干
+const NA_GAN = {
+  qian: { upper:'壬', lower:'甲' },
+  kun:  { upper:'癸', lower:'乙' },
+  zhen: { upper:'庚', lower:'庚' },
+  xun:  { upper:'辛', lower:'辛' },
+  kan:  { upper:'戊', lower:'戊' },
+  li:   { upper:'己', lower:'己' },
+  gen:  { upper:'丙', lower:'丙' },
+  dui:  { upper:'丁', lower:'丁' },
+};
+
+// 地支五行
+const ZHI_WUXING = {
+  '子':'水','丑':'土','寅':'木','卯':'木',
+  '辰':'土','巳':'火','午':'火','未':'土',
+  '申':'金','酉':'金','戌':'土','亥':'水'
+};
+
+// 五行生克：同我=兄弟，生我=父母，我生=子孙，克我=官鬼，我克=妻财
+const WUXING_SIXQIN = {
+  '木木':'兄弟','火火':'兄弟','土土':'兄弟','金金':'兄弟','水水':'兄弟',
+  '木火':'子孙','火土':'子孙','土金':'子孙','金水':'子孙','水木':'子孙',
+  '木水':'父母','火木':'父母','土火':'父母','金土':'父母','水金':'父母',
+  '木金':'官鬼','火水':'官鬼','土木':'官鬼','金火':'官鬼','水土':'官鬼',
+  '木土':'妻财','火金':'妻财','土水':'妻财','金木':'妻财','水火':'妻财',
+};
+
+// 六十四卦 → 八宫归属 + 世应位置 + 卦名
+// key格式: '111111' = 乾为天
+// gong: 所属八宫, shiYao: 世爻位置(0-5), name: 卦名
+const BAGONG_GUA = {
+  '000000': { gong:'kun', shiYao:5, gongName:'坤宫' },
+  '000010': { gong:'kan', shiYao:2, gongName:'坎宫归魂' },
+  '000011': { gong:'kun', shiYao:1, gongName:'坤宫二世' },
+  '000100': { gong:'zhen', shiYao:0, gongName:'震宫一世' },
+  '000101': { gong:'qian', shiYao:4, gongName:'乾宫游魂' },
+  '000110': { gong:'dui', shiYao:1, gongName:'兑宫二世' },
+  '000111': { gong:'kun', shiYao:2, gongName:'坤宫三世' },
+  '001000': { gong:'qian', shiYao:4, gongName:'乾宫五世' },
+  '001001': { gong:'zhen', shiYao:5, gongName:'震宫' },
+  '001010': { gong:'zhen', shiYao:1, gongName:'震宫二世' },
+  '001100': { gong:'dui', shiYao:4, gongName:'兑宫五世' },
+  '001101': { gong:'li', shiYao:0, gongName:'离宫一世' },
+  '001110': { gong:'dui', shiYao:4, gongName:'兑宫游魂' },
+  '001111': { gong:'dui', shiYao:2, gongName:'兑宫归魂' },
+  '010000': { gong:'kun', shiYao:2, gongName:'坤宫归魂' },
+  '010001': { gong:'li', shiYao:3, gongName:'离宫四世' },
+  '010010': { gong:'kan', shiYao:5, gongName:'坎宫' },
+  '010011': { gong:'kan', shiYao:0, gongName:'坎宫一世' },
+  '010100': { gong:'dui', shiYao:3, gongName:'兑宫四世' },
+  '010101': { gong:'kan', shiYao:2, gongName:'坎宫三世' },
+  '010110': { gong:'dui', shiYao:0, gongName:'兑宫一世' },
+  '010111': { gong:'kun', shiYao:4, gongName:'坤宫游魂' },
+  '011000': { gong:'qian', shiYao:3, gongName:'乾宫四世' },
+  '011001': { gong:'zhen', shiYao:2, gongName:'震宫归魂' },
+  '011010': { gong:'zhen', shiYao:4, gongName:'震宫五世' },
+  '011011': { gong:'dui', shiYao:5, gongName:'兑宫' },
+  '011100': { gong:'dui', shiYao:2, gongName:'兑宫三世' },
+  '011101': { gong:'kan', shiYao:3, gongName:'坎宫四世' },
+  '011110': { gong:'zhen', shiYao:4, gongName:'震宫游魂' },
+  '011111': { gong:'kun', shiYao:4, gongName:'坤宫五世' },
+  '100000': { gong:'kun', shiYao:0, gongName:'坤宫一世' },
+  '100001': { gong:'xun', shiYao:4, gongName:'巽宫游魂' },
+  '100010': { gong:'kan', shiYao:1, gongName:'坎宫二世' },
+  '100011': { gong:'xun', shiYao:2, gongName:'巽宫归魂' },
+  '100100': { gong:'gen', shiYao:5, gongName:'艮宫' },
+  '100101': { gong:'gen', shiYao:0, gongName:'艮宫一世' },
+  '100110': { gong:'xun', shiYao:4, gongName:'巽宫游魂' },
+  '101000': { gong:'kan', shiYao:4, gongName:'坎宫游魂' },
+  '101001': { gong:'xun', shiYao:4, gongName:'巽宫五世' },
+  '101010': { gong:'li', shiYao:2, gongName:'离宫三世' },
+  '101011': { gong:'xun', shiYao:1, gongName:'巽宫二世' },
+  '101100': { gong:'kan', shiYao:4, gongName:'坎宫五世' },
+  '101101': { gong:'li', shiYao:5, gongName:'离宫' },
+  '101110': { gong:'li', shiYao:1, gongName:'离宫二世' },
+  '101111': { gong:'qian', shiYao:2, gongName:'乾宫归魂' },
+  '110000': { gong:'kun', shiYao:1, gongName:'坤宫二世' },
+  '110001': { gong:'xun', shiYao:2, gongName:'巽宫三世' },
+  '110010': { gong:'li', shiYao:4, gongName:'离宫五世' },
+  '110011': { gong:'gen', shiYao:4, gongName:'艮宫游魂' },
+  '110100': { gong:'gen', shiYao:2, gongName:'艮宫归魂' },
+  '110101': { gong:'gen', shiYao:3, gongName:'艮宫四世' },
+  '110111': { gong:'xun', shiYao:0, gongName:'巽宫一世' },
+  '111000': { gong:'kun', shiYao:2, gongName:'坤宫三世' },
+  '111001': { gong:'xun', shiYao:3, gongName:'巽宫四世' },
+  '111010': { gong:'li', shiYao:4, gongName:'离宫游魂' },
+  '111011': { gong:'gen', shiYao:4, gongName:'艮宫五世' },
+  '111100': { gong:'kun', shiYao:3, gongName:'坤宫四世' },
+  '111101': { gong:'li', shiYao:2, gongName:'离宫归魂' },
+  '111110': { gong:'kun', shiYao:4, gongName:'坤宫五世' },
+  '111111': { gong:'qian', shiYao:5, gongName:'乾宫' },
+};
+
+// 八宫五行（本宫五行 = 该宫八卦的"我"）
+const GONG_WUXING = {
+  qian:'金', dui:'金',
+  li:'火',
+  zhen:'木', xun:'木',
+  kan:'水',
+  gen:'土', kun:'土'
+};
+
+// 地支 → 十二生肖
+const ZHI_SHENGXIAO = {
+  '子':'鼠','丑':'牛','寅':'虎','卯':'兔',
+  '辰':'龙','巳':'蛇','午':'马','未':'羊',
+  '申':'猴','酉':'鸡','戌':'狗','亥':'猪'
+};
+
+// 六亲中文名
+const LIUQIN_NAMES = { '兄弟':'兄弟','父母':'父母','子孙':'子孙','官鬼':'官鬼','妻财':'妻财' };
+
+// 用神映射（问事类型 → 用神）
+const YONGSHEN_MAP = {
+  'qicai': { label:'妻财', desc:'财运、妻子、物质' },
+  'guangui': { label:'官鬼', desc:'事业、官运、丈夫' },
+  'fumu': { label:'父母', desc:'学业、文书、长辈' },
+  'zisun': { label:'子孙', desc:'子女、投资、健康' },
+  'xiongdi': { label:'兄弟', desc:'合作、竞争、朋友' },
+};
+
+
 
 // ==================== 起卦逻辑 ====================
 
@@ -2700,6 +2995,147 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ==================== 六爻排盘引擎（纳甲·安世应·定六亲·装卦） ====================
+
+/**
+ * 装卦核心：根据六爻序列 + 本宫卦，计算每爻的纳甲、地支、六亲、世应
+ * @param {number[]} yaoArray - 六爻数组 [初,二,三,四,五,上]，1=阳 0=阴
+ * @param {object} bagongInfo - BAGONG_GUA 条目
+ * @returns {object[]} 六爻排盘数据
+ */
+function zhuangGua(yaoArray, bagongInfo) {
+  const gong = bagongInfo.gong;
+  const gongWuxing = GONG_WUXING[gong];
+  const naZhiTemplate = NA_ZHI[gong];
+  const shiYaoPos = bagongInfo.shiYao;
+  const yingYaoPos = (shiYaoPos + 3) % 6;
+
+  const lines = [];
+  for (let i = 0; i < 6; i++) {
+    const zhi = naZhiTemplate[i];
+    const zhiWuxing = ZHI_WUXING[zhi];
+    const liuqinKey = gongWuxing + zhiWuxing; // "我"的五行 + 爻地支五行
+    const liuqin = WUXING_SIXQIN[liuqinKey] || '兄弟';
+    const isYang = yaoArray[i] === 1;
+
+    // 纳天干（内卦纳下干，外卦纳上干）
+    const ganData = NA_GAN[gong];
+    const gan = i < 3 ? ganData.lower : ganData.upper;
+
+    // 纳甲完整 = 天干 + 地支
+    const najia = gan + zhi;
+
+    lines.push({
+      pos: i,                        // 0=初爻, 5=上爻
+      posName: ['初','二','三','四','五','上'][i],
+      yao: isYang ? 'yang' : 'yin',
+      yaoSymbol: isYang ? '⚊' : '⚋',
+      najia: najia,
+      gan: gan,
+      zhi: zhi,
+      zhiWuxing: zhiWuxing,
+      liuqin: liuqin,
+      isShi: i === shiYaoPos,
+      isYing: i === yingYaoPos,
+      shengxiao: ZHI_SHENGXIAO[zhi],
+    });
+  }
+  return lines;
+}
+
+/**
+ * 根据六爻序列查找卦宫信息
+ */
+function findBagong(yaoKey) {
+  return BAGONG_GUA[yaoKey] || null;
+}
+
+/**
+ * 根据问事类型自动确定用神
+ */
+function autoYongshen(liuqinLines) {
+  // 默认用神 = 妻财（财运）
+  // 可以在UI中让用户选择
+  const results = {};
+  for (const type in YONGSHEN_MAP) {
+    const hits = [];
+    liuqinLines.forEach((l, i) => {
+      if (l.liuqin === YONGSHEN_MAP[type].label) hits.push(i);
+    });
+    results[type] = hits;
+  }
+  return results;
+}
+
+/**
+ * 生成六爻排盘HTML表格
+ */
+function renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, yongshenType) {
+  if (!bagongInfo) return '<p style="text-align:center;color:var(--text-dim);">无法识别卦宫</p>';
+
+  const yongshenPositions = yongshenType ? autoYongshen(liuqinLines)[yongshenType] || [] : [];
+
+  // 从下到上渲染（初爻在表格底部）
+  const rows = [];
+  for (let i = 5; i >= 0; i--) {
+    const line = liuqinLines[i];
+    const yr = yaoResults[i];
+    const isChanging = yr && yr.changing;
+    const isYongshen = yongshenPositions.includes(i);
+
+    const yaoDisplay = line.yao === 'yang'
+      ? (isChanging ? '<span class="yao-symbol yang changing">━━━</span>' : '<span class="yao-symbol yang">━━━</span>')
+      : (isChanging ? '<span class="yao-symbol yin changing">━ ━</span>' : '<span class="yao-symbol yin">━ ━</span>');
+
+    const shiyingMark = line.isShi ? '<span class="shiyao-mark shi">世</span>'
+      : line.isYing ? '<span class="shiyao-mark ying">应</span>' : '';
+
+    const yongshenMark = isYongshen ? '<span class="yongshen-mark">用</span>' : '';
+
+    rows.push(`
+      <tr style="${isChanging ? 'background:rgba(155,48,32,0.06);' : ''}">
+        <td class="yao-pos">${line.posName}爻</td>
+        <td>${yaoDisplay}</td>
+        <td>${line.najia}</td>
+        <td><span class="liuqin-tag ${line.liuqin}">${line.liuqin}${yongshenMark}</span></td>
+        <td>${shiyingMark}</td>
+        <td>${line.zhiWuxing}</td>
+        <td>${line.shengxiao}</td>
+      </tr>
+    `);
+  }
+
+  const gongWuxing = GONG_WUXING[bagongInfo.gong];
+
+  return `
+    <div class="liuyao-table-wrap" id="liuyaoTableWrap">
+      <div class="liuyao-table-title">▎六爻排盘</div>
+
+      <table class="liuyao-table">
+        <thead>
+          <tr>
+            <th>爻位</th>
+            <th>爻象</th>
+            <th>纳甲</th>
+            <th>六亲</th>
+            <th>世应</th>
+            <th>五行</th>
+            <th>生肖</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.join('')}
+        </tbody>
+      </table>
+
+      <div class="gong-info">
+        卦宫：<span>${bagongInfo.gongName}</span>（${gongWuxing}）&emsp;
+        卦名：<span>${bagongInfo.name}</span>
+      </div>
+    </div>
+  `;
+}
+
 // ==================== 结果展示（引用经传原文） ====================
 
 function showResult(yaoResults) {
@@ -2760,6 +3196,16 @@ function showResult(yaoResults) {
   if (bianGua.yaoci && changingLines.length > 0 && benKey !== bianKey) {
     const lines = changingLines.map(i => bianGua.yaoci[i]).filter(s => s);
     if (lines.length) bianYaoCiHtml = `<div class="classical-text"><span class="ct-label">▎变卦相关爻辞</span>${lines.join('<br>')}</div>`;
+  }
+
+  // ===== 六爻排盘（京房纳甲装卦） =====
+  const liuyaoPanel = document.getElementById('liuyaoPaiPan');
+  const bagongInfo = findBagong(benKey);
+  if (bagongInfo) {
+    const liuqinLines = zhuangGua(benYao, bagongInfo);
+    liuyaoPanel.innerHTML = renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, 'qicai');
+  } else {
+    liuyaoPanel.innerHTML = '';
   }
 
   // 解读
