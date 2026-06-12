@@ -789,6 +789,208 @@
     color: var(--gold);
   }
 
+  /* ===== 趣味功能卡片 ===== */
+  .fun-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) {
+    .fun-section { grid-template-columns: 1fr; }
+  }
+  .fun-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all .3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .fun-card:hover {
+    border-color: var(--bronze);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .fun-card .fun-icon { font-size: 28px; margin-bottom: 8px; }
+  .fun-card .fun-title {
+    font-size: 16px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .fun-card .fun-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .fun-card .fun-result {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .fun-card .fun-result.show { display: block; }
+  .fun-card .fun-result .fr-line {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 2;
+  }
+  .fun-card .fun-result .fr-highlight {
+    color: var(--gold-light);
+    font-weight: bold;
+    font-size: 18px;
+    display: block;
+    text-align: center;
+    margin: 8px 0;
+    letter-spacing: 3px;
+  }
+  .fun-card .fun-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    display: none;
+  }
+  .fun-card .fun-input-row.show { display: flex; }
+  .fun-card .fun-input {
+    flex: 1;
+    padding: 8px 12px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    text-align: center;
+  }
+  .fun-card .fun-input:focus { border-color: var(--gold); }
+  .fun-card .fun-btn {
+    padding: 8px 16px;
+    background: rgba(212,168,75,0.12);
+    border: 1px solid var(--bronze-dark);
+    border-radius: 6px;
+    color: var(--bronze-light);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all .3s;
+    white-space: nowrap;
+  }
+  .fun-card .fun-btn:hover {
+    background: rgba(212,168,75,0.25);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* 黄历卡片特别样式 */
+  .fun-card.huangli-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(160deg, #1a1712 0%, #1e1a14 100%);
+    border-color: var(--bronze-dark);
+  }
+  .fun-card.huangli-card:hover { border-color: var(--bronze); }
+  .hl-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    .hl-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .hl-item { padding: 8px 4px; }
+  .hl-item .hl-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .hl-item .hl-value {
+    font-size: 16px;
+    color: var(--gold-light);
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+  .hl-item .hl-sub {
+    font-size: 11px;
+    color: var(--jade);
+    margin-top: 2px;
+  }
+  .hl-yi-ji {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .hl-yi, .hl-ji {
+    flex: 1;
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .hl-yi .hl-tag { color: var(--jade); font-weight: bold; }
+  .hl-ji .hl-tag { color: var(--cinnabar); font-weight: bold; }
+
+  /* 每日一爻 大卦展示 */
+  .daily-gua-display {
+    text-align: center;
+    padding: 10px 0;
+  }
+  .daily-gua-display .dgd-symbol {
+    font-size: 48px;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(200,168,76,0.4);
+  }
+  .daily-gua-display .dgd-name {
+    font-size: 20px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-weight: bold;
+  }
+  .daily-gua-display .dgd-tuan {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.8;
+    font-style: italic;
+  }
+
+  /* 缘分测试 */
+  .yuanfen-bar {
+    height: 8px;
+    background: #111;
+    border-radius: 4px;
+    margin: 10px 0;
+    overflow: hidden;
+  }
+  .yuanfen-bar .yuanfen-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--cinnabar), var(--gold), var(--jade));
+    transition: width 1s ease;
+  }
+
+  /* 姓名打分 */
+  .name-score-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--bronze);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--gold-light);
+    background: rgba(0,0,0,0.3);
+    transition: all .5s;
+  }
+
   /* ===== 八卦知识区 ===== */
   .knowledge-section {
     background: var(--card);
@@ -1359,6 +1561,73 @@
     <div class="gua-cards" id="guaCards"></div>
     <div class="interpretation" id="interpretation"></div>
     <button class="reset-btn" onclick="resetAll()">重新起卦</button>
+  </div>
+
+  <!-- 趣味功能 -->
+  <div class="fun-section" id="funSection">
+    <!-- 每日黄历 -->
+    <div class="fun-card huangli-card" id="huangliCard">
+      <div class="fun-icon">📅</div>
+      <div class="fun-title">每日黄历</div>
+      <div class="fun-desc">今日宜忌 · 干支五行 · 节气节日</div>
+      <div class="fun-result" id="huangliResult">
+        <div class="hl-grid">
+          <div class="hl-item"><div class="hl-label">公历</div><div class="hl-value" id="hlSolar">—</div></div>
+          <div class="hl-item"><div class="hl-label">农历</div><div class="hl-value" id="hlLunar">—</div><div class="hl-sub" id="hlFestival"></div></div>
+          <div class="hl-item"><div class="hl-label">干支</div><div class="hl-value" id="hlGanzhi">—</div><div class="hl-sub" id="hlZodiac"></div></div>
+          <div class="hl-item"><div class="hl-label">五行</div><div class="hl-value" id="hlWuxing">—</div><div class="hl-sub" id="hlJieqi"></div></div>
+        </div>
+        <div class="hl-yi-ji">
+          <div class="hl-yi"><span class="hl-tag">宜：</span><span id="hlYi">—</span></div>
+          <div class="hl-ji"><span class="hl-tag">忌：</span><span id="hlJi">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 每日一爻 -->
+    <div class="fun-card" id="dailyYaoCard" onclick="FunFeatures.toggleDailyYao()">
+      <div class="fun-icon">⚊</div>
+      <div class="fun-title">每日一爻</div>
+      <div class="fun-desc">今日随机一卦，看看命运暗示</div>
+      <div class="fun-result" id="dailyYaoResult">
+        <div class="daily-gua-display" id="dailyGuaDisplay"></div>
+      </div>
+    </div>
+
+    <!-- 今日幸运色 -->
+    <div class="fun-card" id="luckyColorCard" onclick="FunFeatures.toggleLuckyColor()">
+      <div class="fun-icon">🎨</div>
+      <div class="fun-title">今日幸运色</div>
+      <div class="fun-desc">基于五行推算今日最旺色彩</div>
+      <div class="fun-result" id="luckyColorResult">
+        <div class="fr-line" id="luckyColorInfo"></div>
+      </div>
+    </div>
+
+    <!-- 缘分测试 -->
+    <div class="fun-card" id="yuanfenCard" onclick="FunFeatures.toggleYuanfen()">
+      <div class="fun-icon">💕</div>
+      <div class="fun-title">缘分测试</div>
+      <div class="fun-desc">测测你们的缘分指数</div>
+      <div class="fun-input-row" id="yuanfenInputs">
+        <input class="fun-input" id="yuanfenName1" placeholder="你的名字" maxlength="10">
+        <input class="fun-input" id="yuanfenName2" placeholder="TA的名字" maxlength="10">
+        <button class="fun-btn" onclick="FunFeatures.calcYuanfen(event)">测试</button>
+      </div>
+      <div class="fun-result" id="yuanfenResult"></div>
+    </div>
+
+    <!-- 姓名打分 -->
+    <div class="fun-card" id="nameScoreCard" onclick="FunFeatures.toggleNameScore()">
+      <div class="fun-icon">📝</div>
+      <div class="fun-title">姓名打分</div>
+      <div class="fun-desc">五格数理分析你的名字</div>
+      <div class="fun-input-row" id="nameScoreInputs">
+        <input class="fun-input" id="nameScoreInput" placeholder="输入姓名（2-4字）" maxlength="4">
+        <button class="fun-btn" onclick="FunFeatures.calcNameScore(event)">分析</button>
+      </div>
+      <div class="fun-result" id="nameScoreResult"></div>
+    </div>
   </div>
 
   <!-- 八卦基础知识 -->
@@ -2648,6 +2917,359 @@ function resetAll() {
 
   isCasting = false;
 }
+</script>
+
+<script>
+// ==================== 趣味功能模块 ====================
+const FunFeatures = (function() {
+  'use strict';
+
+  // ===== 缓存 =====
+  let huangliLoaded = false;
+  let dailyYaoLoaded = false;
+  let luckyColorLoaded = false;
+  let yuanfenLoaded = false;
+  let nameScoreLoaded = false;
+
+  // ===== 工具 =====
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function seedFromDate(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  // ===== 1. 每日黄历 =====
+  async function loadHuangli() {
+    if (huangliLoaded) return;
+    huangliLoaded = true;
+    const resultEl = document.getElementById('huangliResult');
+
+    try {
+      const resp = await fetch('https://api.530.news/api/lunar?date=today&timezone=8');
+      const json = await resp.json();
+      if (json.code !== 200) throw new Error('API error');
+
+      const d = json.data;
+      const now = new Date();
+      const weekDays = ['日','一','二','三','四','五','六'];
+
+      document.getElementById('hlSolar').textContent = `${d.solar.month}/${d.solar.day} 周${weekDays[now.getDay()]}`;
+      document.getElementById('hlLunar').textContent = d.lunarMonthName + d.lunarDayName;
+      document.getElementById('hlGanzhi').textContent = d.dayInGanZhi;
+      document.getElementById('hlZodiac').textContent = d.zodiac + '年';
+      document.getElementById('hlWuxing').textContent = wuxingFromGanzhi(d.dayInGanZhi);
+      document.getElementById('hlJieqi').textContent = (d.jieqi && d.jieqi.length > 0) ? d.jieqi[0] : '';
+
+      if (d.festival && d.festival.length > 0) {
+        document.getElementById('hlFestival').textContent = d.festival.join('·');
+      }
+
+      // 宜忌（基于黄历日干支推导）
+      const yiJi = getYiJi(d.dayInGanZhi, d.lunarMonthName);
+      document.getElementById('hlYi').textContent = yiJi.yi;
+      document.getElementById('hlJi').textContent = yiJi.ji;
+    } catch(e) {
+      // 降级：纯前端推算
+      loadHuangliFallback();
+    }
+    resultEl.classList.add('show');
+  }
+
+  function wuxingFromGanzhi(gz) {
+    if (!gz || gz.length < 2) return '—';
+    const tg = gz[0];
+    const map = { '甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水' };
+    return map[tg] || '—';
+  }
+
+  function getYiJi(dayGz, lunarMonth) {
+    // 基于日干支和农历月的简易宜忌
+    const yiBase = ['祭祀','祈福','出行','会友','嫁娶','纳采','开市','交易','安床','修造','入学','求医'];
+    const jiBase = ['动土','破土','安葬','行丧','伐木','狩猎','开渠','穿井'];
+
+    const yiSeed = seedFromDate(dayGz + 'yi');
+    const jiSeed = seedFromDate(dayGz + 'ji');
+
+    const yiItems = shuffleBySeed([...yiBase], yiSeed).slice(0, 4);
+    const jiItems = shuffleBySeed([...jiBase], jiSeed).slice(0, 3);
+
+    return {
+      yi: yiItems.join('、'),
+      ji: jiItems.join('、')
+    };
+  }
+
+  function shuffleBySeed(arr, seed) {
+    const a = [...arr];
+    let s = seed;
+    for (let i = a.length - 1; i > 0; i--) {
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      const j = s % (i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function loadHuangliFallback() {
+    const now = new Date();
+    const gz = getDayGanZhi(now);
+    const yiJi = getYiJi(gz, '');
+
+    document.getElementById('hlSolar').textContent = `${now.getMonth()+1}/${now.getDate()} 周${['日','一','二','三','四','五','六'][now.getDay()]}`;
+    document.getElementById('hlLunar').textContent = '（离线模式）';
+    document.getElementById('hlGanzhi').textContent = gz;
+    document.getElementById('hlWuxing').textContent = wuxingFromGanzhi(gz);
+    document.getElementById('hlYi').textContent = yiJi.yi;
+    document.getElementById('hlJi').textContent = yiJi.ji;
+  }
+
+  function getDayGanZhi(date) {
+    const tg = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const dz = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    // 简化：以2024-01-01甲子日为基准
+    const base = new Date(2024, 0, 1);
+    const diff = Math.floor((date.getTime() - base.getTime()) / 86400000);
+    const tgIdx = ((diff % 10) + 10) % 10;
+    const dzIdx = ((diff % 12) + 12) % 12;
+    return tg[tgIdx] + dz[dzIdx];
+  }
+
+  // ===== 2. 每日一爻 =====
+  function loadDailyYao() {
+    if (dailyYaoLoaded) return;
+    dailyYaoLoaded = true;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const seed = seedFromDate(today + 'yao');
+    const guaKeys = Object.keys(window.GUA64 || {});
+    if (guaKeys.length === 0) return;
+
+    const idx = seed % guaKeys.length;
+    const guaKey = guaKeys[idx];
+    const gua = window.GUA64[guaKey];
+
+    const display = document.getElementById('dailyGuaDisplay');
+    display.innerHTML = `
+      <div class="dgd-symbol">${renderHexagramSymbol(guaKey)}</div>
+      <div class="dgd-name">${gua.name}</div>
+      <div class="dgd-tuan">${(gua.tuan || gua.interpret || '').substring(0, 60)}…</div>
+    `;
+    document.getElementById('dailyYaoResult').classList.add('show');
+  }
+
+  function renderHexagramSymbol(key) {
+    // 用八卦符号组合展示六爻
+    const lowerKey = key.slice(3, 6);
+    const upperKey = key.slice(0, 3);
+    const trigramMap = {
+      '111':'☰','011':'☱','101':'☲','100':'☳',
+      '110':'☴','010':'☵','001':'☶','000':'☷'
+    };
+    const upper = trigramMap[upperKey] || '?';
+    const lower = trigramMap[lowerKey] || '?';
+    return upper + lower;
+  }
+
+  // ===== 3. 今日幸运色 =====
+  function loadLuckyColor() {
+    if (luckyColorLoaded) return;
+    luckyColorLoaded = true;
+
+    const now = new Date();
+    const gz = getDayGanZhi(now);
+    const wuxing = wuxingFromGanzhi(gz);
+
+    const colors = {
+      '木': { color: '#7eb860', name: '翠绿', items: '绿色系 · 植物 · 木质饰品', advice: '木主生发，宜穿绿衣、佩戴木质饰品，利事业进取。' },
+      '火': { color: '#e07050', name: '朱红', items: '红色系 · 暖色调 · 赤色配饰', advice: '火主光明，宜穿红衣、佩戴红绳，利人际交往。' },
+      '土': { color: '#b8a878', name: '赭黄', items: '黄色系 · 大地色 · 玉质配饰', advice: '土主承载，宜穿黄衣、佩戴玉石，利财运稳定。' },
+      '金': { color: '#e8d38c', name: '鎏金', items: '金色系 · 白色系 · 金属配饰', advice: '金主决断，宜穿白衣金饰，利决策与收获。' },
+      '水': { color: '#4a80b4', name: '靛蓝', items: '蓝色系 · 黑色系 · 水晶配饰', advice: '水主智慧，宜穿蓝黑衣、佩戴水晶，利学业思考。' },
+    };
+
+    const c = colors[wuxing] || colors['土'];
+    document.getElementById('luckyColorInfo').innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${c.color};box-shadow:0 0 16px ${c.color};"></div>
+        <span class="fr-highlight" style="margin:0;">${c.name}</span>
+      </div>
+      <div class="fr-line" style="color:var(--text-dim);">${c.items}</div>
+      <div class="fr-line" style="margin-top:8px;color:var(--text);">${c.advice}</div>
+    `;
+    document.getElementById('luckyColorResult').classList.add('show');
+  }
+
+  // ===== 4. 缘分测试 =====
+  function toggleYuanfen() {
+    document.getElementById('yuanfenInputs').classList.toggle('show');
+  }
+
+  function calcYuanfen(e) {
+    if (e) e.stopPropagation();
+    if (yuanfenLoaded) return;
+    yuanfenLoaded = true;
+
+    const n1 = document.getElementById('yuanfenName1').value.trim();
+    const n2 = document.getElementById('yuanfenName2').value.trim();
+    if (!n1 || !n2) {
+      alert('请输入两个人的名字');
+      yuanfenLoaded = false;
+      return;
+    }
+
+    // 名字笔画转数字
+    const s1 = nameToNumber(n1);
+    const s2 = nameToNumber(n2);
+    const score = (seedFromDate(n1 + '❤' + n2) % 40 + 60); // 60-99
+    const level = score >= 90 ? '天作之合' : score >= 80 ? '情投意合' : score >= 70 ? '心有灵犀' : '缘分不错';
+    const emoji = score >= 90 ? '💖' : score >= 80 ? '💕' : score >= 70 ? '💛' : '💚';
+
+    const advice = score >= 90
+      ? '你们是天造地设的一对，性格互补，价值观相合。珍惜这段缘分吧！'
+      : score >= 80
+      ? '你们很般配，彼此吸引又互相尊重。多沟通会让感情更深。'
+      : score >= 70
+      ? '你们有默契，但需要多一些包容和理解。缘分需要用心经营。'
+      : '缘分是有的，但需要更多耐心和磨合。给彼此一些时间。';
+
+    const guaIdx = (s1 + s2) % 8;
+    const guaNames = ['乾','兑','离','震','巽','坎','艮','坤'];
+    const guaMean = ['刚健主动','愉悦沟通','热情光明','行动活力','温柔渗透','深情包容','稳重守护','柔顺包容'];
+    const guaEmoji = ['☰','☱','☲','☳','☴','☵','☶','☷'];
+
+    document.getElementById('yuanfenResult').innerHTML = `
+      <div class="fr-highlight">${emoji} ${score}分</div>
+      <div style="text-align:center;font-size:14px;color:var(--bronze-light);letter-spacing:2px;">${level}</div>
+      <div class="yuanfen-bar"><div class="yuanfen-fill" style="width:${score}%"></div></div>
+      <div class="fr-line">${advice}</div>
+      <div class="fr-line" style="margin-top:8px;text-align:center;color:var(--text-dim);">
+        你们的卦象：${guaEmoji[guaIdx]}${guaNames[guaIdx]} — ${guaMean[guaIdx]}
+      </div>
+    `;
+    document.getElementById('yuanfenResult').classList.add('show');
+    document.getElementById('yuanfenInputs').classList.remove('show');
+  }
+
+  function nameToNumber(name) {
+    let sum = 0;
+    for (let i = 0; i < name.length; i++) {
+      sum += name.charCodeAt(i);
+    }
+    return sum;
+  }
+
+  // ===== 5. 姓名打分（五格数理） =====
+  function toggleNameScore() {
+    document.getElementById('nameScoreInputs').classList.toggle('show');
+  }
+
+  function calcNameScore(e) {
+    if (e) e.stopPropagation();
+    if (nameScoreLoaded) return;
+    nameScoreLoaded = true;
+
+    const name = document.getElementById('nameScoreInput').value.trim();
+    if (!name || name.length < 2) {
+      alert('请输入2-4个字的中文姓名');
+      nameScoreLoaded = false;
+      return;
+    }
+
+    const strokes = getStrokeCounts(name);
+    const tianGe = name.length === 2 ? strokes[0] + 1 : strokes[0] + 1;   // 天格（姓氏+1）
+    const renGe = name.length === 2 ? strokes[0] + strokes[1] : strokes[0] + strokes[1]; // 人格
+    const diGe = name.length === 2 ? strokes[1] + 1 : strokes[1] + strokes[2]; // 地格
+    const waiGe = name.length === 2 ? 2 : strokes[name.length-1] + 1;     // 外格
+    const zongGe = strokes.reduce((a,b) => a+b, 0);                      // 总格
+
+    const wugeJiXiong = {
+      tian: wugeExplain(tianGe),
+      ren: wugeExplain(renGe),
+      di: wugeExplain(diGe),
+      wai: wugeExplain(waiGe),
+      zong: wugeExplain(zongGe),
+    };
+
+    // 综合评分
+    const jiCount = Object.values(wugeJiXiong).filter(v => v.ji).length;
+    const totalScore = Math.round(jiCount / 5 * 40 + 60);
+    const level = totalScore >= 90 ? '大吉' : totalScore >= 80 ? '吉' : totalScore >= 70 ? '中吉' : '平';
+
+    document.getElementById('nameScoreResult').innerHTML = `
+      <div class="name-score-circle" style="border-color:${totalScore>=80?'var(--jade)':totalScore>=70?'var(--bronze)':'var(--cinnabar)'};color:${totalScore>=80?'var(--jade)':totalScore>=70?'var(--bronze-light)':'var(--cinnabar)'}">
+        ${totalScore}
+      </div>
+      <div style="text-align:center;font-size:14px;color:${totalScore>=80?'var(--jade)':totalScore>=70?'var(--bronze-light)':'var(--cinnabar)'};letter-spacing:3px;margin-bottom:8px;">${level}</div>
+      <div class="fr-line" style="font-size:11px;">
+        ${['天','人','地','外','总'].map((w,i) => {
+          const k = ['tian','ren','di','wai','zong'][i];
+          const v = [tianGe,renGe,diGe,waiGe,zongGe][i];
+          const x = wugeJiXiong[k];
+          return `<span style="color:${x.ji?'var(--jade)':'var(--cinnabar)'}">${w}格${v}·${x.text}</span>`;
+        }).join(' &nbsp;|&nbsp; ')}
+      </div>
+    `;
+    document.getElementById('nameScoreResult').classList.add('show');
+    document.getElementById('nameScoreInputs').classList.remove('show');
+  }
+
+  function getStrokeCounts(name) {
+    // 简体常用字笔画（简化版）
+    const strokeMap = {
+      '一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,
+      '王':4,'李':7,'张':7,'刘':6,'陈':7,'杨':7,'黄':11,'赵':9,'周':8,'吴':7,
+      '徐':10,'孙':6,'马':3,'胡':9,'朱':6,'郭':10,'何':7,'罗':8,'高':10,'林':8,
+      '文':4,'明':8,'华':6,'伟':6,'强':12,'磊':15,'涛':10,'鹏':13,'军':6,'建':8,
+      '子':3,'杰':8,'宇':6,'浩':10,'然':12,'轩':7,'涵':11,'博':12,'睿':14,'嘉':14,
+      '雨':8,'雪':11,'风':4,'云':4,'雷':13,'龙':5,'凤':4,'麒':19,'麟':23,'鑫':24,
+      '志':7,'勇':9,'刚':6,'毅':15,'敏':11,'慧':15,'静':14,'雅':12,'婷':12,'琳':12,
+      '天':4,'地':6,'人':2,'山':3,'水':4,'火':4,'木':4,'金':8,'土':3,'日':4,
+      '月':4,'星':9,'晨':11,'阳':6,'光':6,'辉':12,'亮':9,'超':12,'越':12,'飞':3,
+      '思':9,'想':13,'学':8,'知':8,'智':12,'信':9,'诚':8,'善':12,'美':9,'和':8,
+      '宁':5,'安':6,'平':5,'康':11,'健':11,'乐':5,'欣':8,'悦':10,'欢':6,'喜':12,
+      '海':10,'江':6,'河':8,'湖':12,'洋':9,'波':8,'浪':10,'涛':10,'源':13,'泉':9,
+      '春':9,'夏':10,'秋':9,'冬':5,'梅':11,'兰':5,'竹':6,'菊':11,'松':8,'柏':9,
+      '芳':7,'芬':7,'英':8,'秀':7,'丽':19,'艳':24,'红':6,'绿':14,'青':8,'白':5,
+    };
+
+    return [...name].map(ch => strokeMap[ch] || ch.charCodeAt(0) % 15 + 3);
+  }
+
+  function wugeExplain(num) {
+    const jiNums = [1,3,5,6,7,8,11,13,15,16,17,18,21,23,24,25,29,31,32,33,35,37,39,41,45,47,48,52,55,57,61,63,65,67,68,71,73,75,81];
+    const banJi = [26,27,28,30,36,38,40,42,43,49,50,51,53,56,58,60,62,64,66,69,70,72,74,76,77,78,79,80];
+    if (jiNums.includes(num)) return { ji: true, text: '吉' };
+    if (banJi.includes(num)) return { ji: false, text: '半吉' };
+    return { ji: false, text: '凶' };
+  }
+
+  // ===== 初始化 =====
+  function init() {
+    // 默认加载黄历
+    loadHuangli();
+  }
+
+  return {
+    init,
+    loadHuangli,
+    loadDailyYao,
+    toggleDailyYao: function() { loadDailyYao(); },
+    toggleLuckyColor: function() { loadLuckyColor(); },
+    toggleYuanfen,
+    calcYuanfen,
+    toggleNameScore,
+    calcNameScore,
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+  FunFeatures.init();
+});
 </script>
 
 <script src="bagua-tracker.js"></script>
