@@ -23,6 +23,7 @@ const PASSWORD_SALT = process.env.ADMIN_PASSWORD_SALT || 'bagua_admin_salt_2024'
 // 允许的 CORS 来源（限制为你的 GitHub Pages 域名）
 const ALLOWED_ORIGINS = [
   'https://zhanghaifan5.github.io',
+  'https://bagua.zhf9.me',
   'http://localhost:8080',
   'http://localhost:3000',
   'http://127.0.0.1:8080',
