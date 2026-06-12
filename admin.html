@@ -177,45 +177,67 @@
 </div>
 
 <script>
-// 密码 SHA-256 哈希 —— 修改密码请改下面这行
-const PASSWORD_HASH = 'c1a96a9aa5bbe75aae6ae522d122968b089c5d211e19ffb8d59462c615996b63';
+// ===== 安全配置 =====
+// ⚠️ 部署 proxy-server.js 后，把下面 URL 改成你的 CloudStudio 地址
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://YOUR_CLOUDSTUDIO_URL'; // 部署后替换
 
-async function sha256(str) {
-  const buf = new TextEncoder().encode(str);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+let authToken = sessionStorage.getItem('bagua_admin_token') || '';
+let currentMode = 'full';
+
+// 带 token 的 fetch
+async function apiFetch(path) {
+  const resp = await fetch(API_BASE + path, {
+    headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
+  });
+  if (resp.status === 401) {
+    authToken = '';
+    sessionStorage.removeItem('bagua_admin_token');
+    document.getElementById('lockScreen').classList.remove('lock-hidden');
+    document.getElementById('mainContent').classList.add('lock-hidden');
+    throw new Error('登录已过期，请重新输入密码');
+  }
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || '请求失败: ' + resp.status);
+  }
+  return resp.json();
 }
 
 async function unlock() {
   const input = document.getElementById('pwdInput').value;
   const err = document.getElementById('lockErr');
+  const btn = document.querySelector('.lock-btn');
   if (!input) { err.textContent = '请输入密码'; return; }
-  const h = await sha256(input);
-  if (h === PASSWORD_HASH) {
-    document.getElementById('lockScreen').classList.add('lock-hidden');
-    document.getElementById('mainContent').classList.remove('lock-hidden');
-    refresh();
-  } else {
-    err.textContent = '密码错误';
+  btn.disabled = true;
+  btn.textContent = '验证中...';
+  try {
+    const data = await apiFetchLogin(input);
+    if (data.token) {
+      authToken = data.token;
+      sessionStorage.setItem('bagua_admin_token', authToken);
+      document.getElementById('lockScreen').classList.add('lock-hidden');
+      document.getElementById('mainContent').classList.remove('lock-hidden');
+      refresh();
+    }
+  } catch(e) {
+    err.textContent = '密码错误或网络不通';
     document.getElementById('pwdInput').value = '';
     document.getElementById('pwdInput').focus();
   }
+  btn.disabled = false;
+  btn.textContent = '解 锁';
 }
 
-// 以下原有代码不变
-const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
-
-let currentMode = 'full'; // 'full' | 'compact'
-
-async function supabaseQuery(table, select, opts) {
-  let url = SUPABASE_URL + '/rest/v1/' + table + '?select=' + encodeURIComponent(select);
-  if (opts && opts.order) url += '&order=' + encodeURIComponent(opts.order);
-  if (opts && opts.limit) url += '&limit=' + opts.limit;
-  const resp = await fetch(url, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+// 登录（不经过 apiFetch，因为还没 token）
+async function apiFetchLogin(password) {
+  const resp = await fetch(API_BASE + '/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
   });
-  if (!resp.ok) throw new Error('Query failed: ' + resp.status);
+  if (!resp.ok) throw new Error('login failed');
   return resp.json();
 }
 
@@ -258,14 +280,19 @@ async function fetchLunar() {
 async function refresh() {
   const app = document.getElementById('app');
   const btn = document.getElementById('refreshBtn');
+  if (!authToken) {
+    document.getElementById('lockScreen').classList.remove('lock-hidden');
+    document.getElementById('mainContent').classList.add('lock-hidden');
+    return;
+  }
   btn.disabled = true;
   btn.textContent = '⏳ 加载中...';
   app.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div>';
 
   try {
     const [visits, divinations, lunar] = await Promise.all([
-      supabaseQuery('visits', '*', { order: 'time.desc', limit: 5000 }),
-      supabaseQuery('divinations', '*', { order: 'time.desc', limit: 5000 }),
+      apiFetch('/api/data/visits'),
+      apiFetch('/api/data/divinations'),
       fetchLunar()
     ]);
     render(visits || [], divinations || [], lunar);
@@ -1102,23 +1129,16 @@ function detectAnomalies(divinations) {
   return results.slice(0, 20);
 }
 
-// 导出 CSV
+// 导出 CSV（通过安全代理）
 function exportCSV() {
-  // 需要从 Supabase 重新获取最新数据
-  const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
   const headers_v = ['session_id','time','browser','os','device','screen_size','language','referrer','ip','country','region','city','isp','timezone'];
   const headers_d = ['session_id','time','method','ben_gua_name','ben_gua_key','ben_gua_upper','ben_gua_lower','bian_gua_name','bian_gua_key','changing_lines','change_count','has_change','yao_results','question'];
 
   async function fetchAll() {
-    const vUrl = SUPABASE_URL + '/rest/v1/visits?select=*&order=time.desc&limit=5000';
-    const dUrl = SUPABASE_URL + '/rest/v1/divinations?select=*&order=time.desc&limit=5000';
-    const [vResp, dResp] = await Promise.all([
-      fetch(vUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }),
-      fetch(dUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } })
+    const [visits, divinations] = await Promise.all([
+      apiFetch('/api/data/visits'),
+      apiFetch('/api/data/divinations')
     ]);
-    const visits = await vResp.json();
-    const divinations = await dResp.json();
 
     function toCSV(rows, headers) {
       const lines = [headers.join(',')];
@@ -1151,7 +1171,26 @@ function exportCSV() {
   fetchAll().catch(e => alert('导出失败: ' + e.message));
 }
 
-document.addEventListener('DOMContentLoaded', refresh);
+document.addEventListener('DOMContentLoaded', async () => {
+  // 如果有缓存 token，先验证是否有效
+  if (authToken) {
+    try {
+      const valid = await apiFetch('/api/verify');
+      if (valid.valid) {
+        document.getElementById('lockScreen').classList.add('lock-hidden');
+        document.getElementById('mainContent').classList.remove('lock-hidden');
+        refresh();
+        return;
+      }
+    } catch(e) {
+      authToken = '';
+      sessionStorage.removeItem('bagua_admin_token');
+    }
+  }
+  // 没 token 或已过期，显示锁屏
+  document.getElementById('lockScreen').classList.remove('lock-hidden');
+  document.getElementById('mainContent').classList.add('lock-hidden');
+});
 </script>
 </body>
 </html>
