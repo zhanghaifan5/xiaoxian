@@ -92,6 +92,18 @@
     }
   }
 
+  // 截断 referrer，防止微信等超长 URL 撑爆字段
+  function getReferrer() {
+    const ref = document.referrer || '';
+    if (!ref) return 'direct';
+    // 微信来源简化标记
+    if (ref.includes('weixin110.qq.com')) return 'weixin://';
+    if (ref.includes('mp.weixin.qq.com')) return 'weixin_mp://';
+    if (ref.includes('servicewechat.com')) return 'weixin_mini://';
+    // 其他来源截断到 500 字符
+    return ref.length > 500 ? ref.substring(0, 500) : ref;
+  }
+
   function getTime() {
     const d = new Date();
     // 转为北京时间 UTC+8
@@ -140,7 +152,7 @@
       device: detectDevice(ua),
       screen_size: screen.width + 'x' + screen.height,
       language: navigator.language,
-      referrer: document.referrer || 'direct',
+      referrer: getReferrer(),
       ip: geo ? geo.ip : '',
       country: geo ? geo.country : '',
       country_code: geo ? geo.country_code : '',
