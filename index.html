@@ -1613,50 +1613,7 @@
       </div>
     </div>
 
-    <!-- 每日一爻 -->
-    <div class="fun-card" id="dailyYaoCard" onclick="FunFeatures.toggleDailyYao()">
-      <div class="fun-icon">&#x2630;</div>
-      <div class="fun-title">每日一爻</div>
-      <div class="fun-desc">今日随机一卦，看看命运暗示</div>
-      <div class="fun-result" id="dailyYaoResult">
-        <div class="daily-gua-display" id="dailyGuaDisplay"></div>
-      </div>
-    </div>
 
-    <!-- 今日幸运色 -->
-    <div class="fun-card" id="luckyColorCard" onclick="FunFeatures.toggleLuckyColor()">
-      <div class="fun-icon">🎨</div>
-      <div class="fun-title">今日幸运色</div>
-      <div class="fun-desc">基于五行推算今日最旺色彩</div>
-      <div class="fun-result" id="luckyColorResult">
-        <div class="fr-line" id="luckyColorInfo"></div>
-      </div>
-    </div>
-
-    <!-- 缘分测试 -->
-    <div class="fun-card" id="yuanfenCard">
-      <div class="fun-icon" onclick="FunFeatures.toggleYuanfen(event)">💕</div>
-      <div class="fun-title" onclick="FunFeatures.toggleYuanfen(event)">缘分测试</div>
-      <div class="fun-desc" onclick="FunFeatures.toggleYuanfen(event)">测测你们的缘分指数</div>
-      <div class="fun-input-row" id="yuanfenInputs" onclick="event.stopPropagation()">
-        <input class="fun-input" id="yuanfenName1" placeholder="你的名字" maxlength="10">
-        <input class="fun-input" id="yuanfenName2" placeholder="TA的名字" maxlength="10">
-        <button class="fun-btn" onclick="FunFeatures.calcYuanfen(event)">测试</button>
-      </div>
-      <div class="fun-result" id="yuanfenResult"></div>
-    </div>
-
-    <!-- 姓名打分 -->
-    <div class="fun-card" id="nameScoreCard">
-      <div class="fun-icon" onclick="FunFeatures.toggleNameScore(event)">📝</div>
-      <div class="fun-title" onclick="FunFeatures.toggleNameScore(event)">姓名打分</div>
-      <div class="fun-desc" onclick="FunFeatures.toggleNameScore(event)">五格数理分析你的名字</div>
-      <div class="fun-input-row" id="nameScoreInputs" onclick="event.stopPropagation()">
-        <input class="fun-input" id="nameScoreInput" placeholder="输入姓名（2-4字）" maxlength="4">
-        <button class="fun-btn" onclick="FunFeatures.calcNameScore(event)">分析</button>
-      </div>
-      <div class="fun-result" id="nameScoreResult"></div>
-    </div>
   </div>
 
   <!-- 八卦基础知识 -->
