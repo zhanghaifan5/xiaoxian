@@ -178,9 +178,10 @@
 
 <script>
 // ===== 安全配置 =====
+// 数据代理 URL（后端有 token 鉴权，暴露地址不泄露数据）
 const API_BASE = window.location.hostname === 'localhost' 
   ? 'http://localhost:3000' 
-  : 'https://6c4e32b36f014b069b2b314e2407c045.codebuddy.cloudstudio.run';
+  : 'https://30575bf0d2f54d3db50b16b9eb648b5e.codebuddy.cloudstudio.run';
 
 let authToken = sessionStorage.getItem('bagua_admin_token') || '';
 let currentMode = 'full';

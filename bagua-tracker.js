@@ -1,6 +1,11 @@
 /**
  * 八卦占卜 - 数据收集前端 SDK
  * 数据同时存储到 localStorage（本地备份）和 Supabase（云端汇总）
+ * 
+ * 安全说明：
+ * - SUPABASE_KEY 是 publishable key，Supabase 官方设计为公开
+ * - 安全防护依靠 Supabase 后台 RLS 策略：匿名用户只能 INSERT，不能 SELECT/DELETE
+ * - 客户端不做 SELECT 操作，仅写入
  */
 (function() {
   'use strict';
@@ -10,12 +15,21 @@
   let visitStartTime = Date.now();
   let visitRecorded = false;
   let leaveRecorded = false;
+  let insertCount = 0;
+  const MAX_INSERTS_PER_SESSION = 50; // 每个 session 最多 50 次写入（防滥用）
 
   // ===== Supabase 配置 =====
+  // publishable key 是 Supabase 设计上公开的，安全靠 RLS 策略
   const SUPABASE_URL = 'https://vaxqenkobsflatavmpta.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_2jhVpFm1-1XsGTggIaGzog_m4l1Zihf';
 
   async function supabaseInsert(table, record) {
+    // 写入频率限制
+    if (insertCount >= MAX_INSERTS_PER_SESSION) {
+      console.warn('Supabase: 写入次数已达上限，忽略本次请求');
+      return;
+    }
+    insertCount++;
     try {
       const resp = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
         method: 'POST',
