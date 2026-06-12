@@ -946,6 +946,35 @@
     color: var(--gold-light);
     text-shadow: 0 0 20px rgba(200,168,76,0.4);
   }
+  .daily-gua-display .dgd-hexagram {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .daily-gua-display .dgd-yao {
+    width: 48px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--gold-light);
+    box-shadow: 0 0 8px rgba(200,168,76,0.3);
+  }
+  .daily-gua-display .dgd-yao.yin {
+    width: 48px;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+  }
+  .daily-gua-display .dgd-yao.yin::before,
+  .daily-gua-display .dgd-yao.yin::after {
+    content: '';
+    width: 20px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--gold-light);
+    box-shadow: 0 0 8px rgba(200,168,76,0.3);
+  }
   .daily-gua-display .dgd-name {
     font-size: 20px;
     color: var(--gold);
@@ -1586,7 +1615,7 @@
 
     <!-- 每日一爻 -->
     <div class="fun-card" id="dailyYaoCard" onclick="FunFeatures.toggleDailyYao()">
-      <div class="fun-icon">⚊</div>
+      <div class="fun-icon">&#x2630;</div>
       <div class="fun-title">每日一爻</div>
       <div class="fun-desc">今日随机一卦，看看命运暗示</div>
       <div class="fun-result" id="dailyYaoResult">
@@ -1605,11 +1634,11 @@
     </div>
 
     <!-- 缘分测试 -->
-    <div class="fun-card" id="yuanfenCard" onclick="FunFeatures.toggleYuanfen()">
-      <div class="fun-icon">💕</div>
-      <div class="fun-title">缘分测试</div>
-      <div class="fun-desc">测测你们的缘分指数</div>
-      <div class="fun-input-row" id="yuanfenInputs">
+    <div class="fun-card" id="yuanfenCard">
+      <div class="fun-icon" onclick="FunFeatures.toggleYuanfen(event)">💕</div>
+      <div class="fun-title" onclick="FunFeatures.toggleYuanfen(event)">缘分测试</div>
+      <div class="fun-desc" onclick="FunFeatures.toggleYuanfen(event)">测测你们的缘分指数</div>
+      <div class="fun-input-row" id="yuanfenInputs" onclick="event.stopPropagation()">
         <input class="fun-input" id="yuanfenName1" placeholder="你的名字" maxlength="10">
         <input class="fun-input" id="yuanfenName2" placeholder="TA的名字" maxlength="10">
         <button class="fun-btn" onclick="FunFeatures.calcYuanfen(event)">测试</button>
@@ -1618,11 +1647,11 @@
     </div>
 
     <!-- 姓名打分 -->
-    <div class="fun-card" id="nameScoreCard" onclick="FunFeatures.toggleNameScore()">
-      <div class="fun-icon">📝</div>
-      <div class="fun-title">姓名打分</div>
-      <div class="fun-desc">五格数理分析你的名字</div>
-      <div class="fun-input-row" id="nameScoreInputs">
+    <div class="fun-card" id="nameScoreCard">
+      <div class="fun-icon" onclick="FunFeatures.toggleNameScore(event)">📝</div>
+      <div class="fun-title" onclick="FunFeatures.toggleNameScore(event)">姓名打分</div>
+      <div class="fun-desc" onclick="FunFeatures.toggleNameScore(event)">五格数理分析你的名字</div>
+      <div class="fun-input-row" id="nameScoreInputs" onclick="event.stopPropagation()">
         <input class="fun-input" id="nameScoreInput" placeholder="输入姓名（2-4字）" maxlength="4">
         <button class="fun-btn" onclick="FunFeatures.calcNameScore(event)">分析</button>
       </div>
@@ -3041,9 +3070,6 @@ const FunFeatures = (function() {
 
   // ===== 2. 每日一爻 =====
   function loadDailyYao() {
-    if (dailyYaoLoaded) return;
-    dailyYaoLoaded = true;
-
     const today = new Date().toISOString().slice(0, 10);
     const seed = seedFromDate(today + 'yao');
     const guaKeys = Object.keys(window.GUA64 || {});
@@ -3063,22 +3089,17 @@ const FunFeatures = (function() {
   }
 
   function renderHexagramSymbol(key) {
-    // 用八卦符号组合展示六爻
-    const lowerKey = key.slice(3, 6);
-    const upperKey = key.slice(0, 3);
-    const trigramMap = {
-      '111':'☰','011':'☱','101':'☲','100':'☳',
-      '110':'☴','010':'☵','001':'☶','000':'☷'
-    };
-    const upper = trigramMap[upperKey] || '?';
-    const lower = trigramMap[lowerKey] || '?';
-    return upper + lower;
+    // 用CSS绘制六爻图形，避免Unicode八卦符号在某些字体下不显示
+    const yaoLines = key.split('').map((bit, i) => {
+      const isYang = bit === '1';
+      return `<div class="dgd-yao ${isYang ? 'yang' : 'yin'}"></div>`;
+    }).join('');
+    return `<div class="dgd-hexagram">${yaoLines}</div>`;
   }
 
   // ===== 3. 今日幸运色 =====
   function loadLuckyColor() {
-    if (luckyColorLoaded) return;
-    luckyColorLoaded = true;
+    // 允许重新生成（不锁定）
 
     const now = new Date();
     const gz = getDayGanZhi(now);
@@ -3105,20 +3126,18 @@ const FunFeatures = (function() {
   }
 
   // ===== 4. 缘分测试 =====
-  function toggleYuanfen() {
+  function toggleYuanfen(e) {
+    if (e) e.stopPropagation();
     document.getElementById('yuanfenInputs').classList.toggle('show');
   }
 
   function calcYuanfen(e) {
     if (e) e.stopPropagation();
-    if (yuanfenLoaded) return;
-    yuanfenLoaded = true;
 
     const n1 = document.getElementById('yuanfenName1').value.trim();
     const n2 = document.getElementById('yuanfenName2').value.trim();
     if (!n1 || !n2) {
       alert('请输入两个人的名字');
-      yuanfenLoaded = false;
       return;
     }
 
@@ -3164,19 +3183,17 @@ const FunFeatures = (function() {
   }
 
   // ===== 5. 姓名打分（五格数理） =====
-  function toggleNameScore() {
+  function toggleNameScore(e) {
+    if (e) e.stopPropagation();
     document.getElementById('nameScoreInputs').classList.toggle('show');
   }
 
   function calcNameScore(e) {
     if (e) e.stopPropagation();
-    if (nameScoreLoaded) return;
-    nameScoreLoaded = true;
 
     const name = document.getElementById('nameScoreInput').value.trim();
     if (!name || name.length < 2) {
       alert('请输入2-4个字的中文姓名');
-      nameScoreLoaded = false;
       return;
     }
 
