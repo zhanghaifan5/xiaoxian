@@ -178,10 +178,9 @@
 
 <script>
 // ===== 安全配置 =====
-// ⚠️ 部署 proxy-server.js 后，把下面 URL 改成你的 CloudStudio 地址
 const API_BASE = window.location.hostname === 'localhost' 
   ? 'http://localhost:3000' 
-  : 'https://YOUR_CLOUDSTUDIO_URL'; // 部署后替换
+  : 'https://6c4e32b36f014b069b2b314e2407c045.codebuddy.cloudstudio.run';
 
 let authToken = sessionStorage.getItem('bagua_admin_token') || '';
 let currentMode = 'full';
