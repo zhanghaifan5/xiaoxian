@@ -178,10 +178,10 @@
 
 <script>
 // ===== 安全配置 =====
-// 数据代理 URL（后端有 token 鉴权，暴露地址不泄露数据）
+// 使用 Supabase Edge Function 作为安全数据代理（替代 CloudStudio proxy-server）
 const API_BASE = window.location.hostname === 'localhost' 
   ? 'http://localhost:3000' 
-  : 'https://e820a0c1357640f28236a0fc23a7f3b5.codebuddy.cloudstudio.run';
+  : 'https://vaxqenkobsflatavmpta.supabase.co/functions/v1/admin-api';
 
 let authToken = sessionStorage.getItem('bagua_admin_token') || '';
 let currentMode = 'full';
@@ -232,7 +232,7 @@ async function unlock() {
 
 // 登录（不经过 apiFetch，因为还没 token）
 async function apiFetchLogin(password) {
-  const resp = await fetch(API_BASE + '/api/login', {
+  const resp = await fetch(API_BASE + '/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password })
@@ -291,8 +291,8 @@ async function refresh() {
 
   try {
     const [visits, divinations, lunar] = await Promise.all([
-      apiFetch('/api/data/visits'),
-      apiFetch('/api/data/divinations'),
+      apiFetch('/data/visits'),
+      apiFetch('/data/divinations'),
       fetchLunar()
     ]);
     render(visits || [], divinations || [], lunar);
@@ -1136,8 +1136,8 @@ function exportCSV() {
 
   async function fetchAll() {
     const [visits, divinations] = await Promise.all([
-      apiFetch('/api/data/visits'),
-      apiFetch('/api/data/divinations')
+      apiFetch('/data/visits'),
+      apiFetch('/data/divinations')
     ]);
 
     function toCSV(rows, headers) {
@@ -1175,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 如果有缓存 token，先验证是否有效
   if (authToken) {
     try {
-      const valid = await apiFetch('/api/verify');
+      const valid = await apiFetch('/verify');
       if (valid.valid) {
         document.getElementById('lockScreen').classList.add('lock-hidden');
         document.getElementById('mainContent').classList.remove('lock-hidden');
