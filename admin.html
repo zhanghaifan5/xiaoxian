@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>八卦占卜 · 数据面板</title>
+<title>八卦占卜 · 数据面板（在线）</title>
 <style>
   :root {
     --bg: #0d0c09;
@@ -14,128 +14,1183 @@
     --text: #d8cfb8;
     --text-dim: #8a8068;
     --border: #2e2820;
+    --accent: #8b3a1a;
+    --jade: #5a8a6a;
+    --warn: #d4a853;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","Noto Serif SC",sans-serif; padding:20px; min-height:100vh; }
-  h1 { text-align:center; color:var(--gold); margin:20px 0; font-size:24px; }
+  .container { max-width:1100px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); margin:20px 0 8px; font-size:28px; letter-spacing:4px; }
+  .subtitle { text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:16px; }
+  .nav { text-align:center; margin:16px 0; display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; }
+  .nav a, .nav button { color:var(--bronze); text-decoration:none; font-size:13px; background:transparent; border:1px solid var(--border); padding:6px 16px; border-radius:6px; cursor:pointer; font-family:inherit; transition:all .3s; }
+  .nav a:hover, .nav button:hover { color:var(--gold); border-color:var(--gold); }
+  .nav .active { background:rgba(200,168,76,0.12); border-color:var(--gold); color:var(--gold); }
+
   .empty { text-align:center; color:var(--text-dim); padding:60px 20px; }
   .empty .icon { font-size:48px; margin-bottom:12px; }
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
-  .card .num { font-size:36px; color:var(--gold-light); font-weight:bold; }
-  .card .label { font-size:13px; color:var(--text-dim); margin-top:4px; }
-  .section { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px; }
-  .section h2 { color:var(--gold); font-size:16px; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin-bottom:24px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; transition:all .3s; }
+  .card:hover { border-color:var(--bronze); }
+  .card .num { font-size:30px; color:var(--gold-light); font-weight:bold; }
+  .card .label { font-size:12px; color:var(--text-dim); margin-top:4px; }
+  .card .sub { font-size:11px; color:#5a5040; margin-top:2px; }
+
+  .section { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:16px; }
+  .section h2 { color:var(--gold); font-size:15px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:8px; letter-spacing:2px; }
   table { width:100%; border-collapse:collapse; font-size:13px; }
-  th,td { padding:6px 10px; text-align:left; border-bottom:1px solid var(--border); }
-  th { color:var(--text-dim); font-weight:normal; }
+  th,td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  th { color:var(--text-dim); font-weight:normal; font-size:12px; }
   td { color:var(--text); }
-  .bar { display:inline-block; height:14px; background:var(--bronze); border-radius:3px; min-width:4px; }
-  .nav { text-align:center; margin:16px 0; }
-  .nav a { color:var(--gold); text-decoration:none; font-size:14px; margin:0 8px; }
-  .nav a:hover { color:var(--gold-light); }
-  .recent { max-height:400px; overflow-y:auto; }
-  .note { text-align:center; color:var(--text-dim); font-size:12px; margin-top:30px; padding:10px; }
+  .bar-wrap { display:flex; align-items:center; gap:8px; }
+  .bar { height:14px; background:linear-gradient(90deg,#5a4530,var(--bronze)); border-radius:3px; min-width:3px; transition:width .5s; }
+  .bar-count { font-size:12px; color:var(--text-dim); white-space:nowrap; }
+  .bar.pct { background:linear-gradient(90deg,#3a5a30,var(--jade)); }
+  .bar.warn { background:linear-gradient(90deg,#5a3a20,var(--warn)); }
+
+  .recent { max-height:500px; overflow-y:auto; }
+  .recent::-webkit-scrollbar { width:6px; }
+  .recent::-webkit-scrollbar-thumb { background:#3a3020; border-radius:3px; }
+
+  .note { text-align:center; color:var(--text-dim); font-size:11px; margin-top:30px; padding:10px; }
+  .loading { text-align:center; padding:60px; color:var(--text-dim); }
+  .loading .spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .col { flex:1; min-width:280px; }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; margin:0 2px; }
+  .badge-change { background:rgba(200,168,76,0.2); color:var(--gold); }
+  .badge-none { background:rgba(90,138,106,0.2); color:var(--jade); }
+
+  .trigram-list { display:flex; flex-wrap:wrap; gap:6px; }
+  .trigram-tag { background:rgba(200,168,76,0.08); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:12px; white-space:nowrap; }
+  .trigram-tag .name { color:var(--text); }
+  .trigram-tag .count { color:var(--text-dim); margin-left:4px; }
+
+  .hour-bar { display:flex; gap:1px; align-items:flex-end; height:80px; }
+  .hour-col { flex:1; background:rgba(200,168,76,0.25); border-radius:2px 2px 0 0; min-width:8px; position:relative; transition:height .4s; cursor:default; }
+  .hour-col:hover { background:var(--gold); }
+  .hour-col span { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--text-dim); white-space:nowrap; }
+
+  .pie-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .pie-item { background:rgba(0,0,0,0.2); border-radius:8px; padding:12px; text-align:center; }
+  .pie-item .pie-name { font-size:12px; color:var(--text-dim); margin-bottom:4px; }
+  .pie-item .pie-num { font-size:20px; color:var(--gold-light); font-weight:bold; }
+  .pie-item .pie-pct { font-size:11px; color:#5a5040; }
+
+  .question-list td.qtext { max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* 密码锁屏 */
+  .lock-screen { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+  .lock-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:40px 36px; text-align:center; max-width:360px; width:90%; }
+  .lock-box .lock-icon { font-size:48px; margin-bottom:16px; }
+  .lock-box h2 { color:var(--gold); font-size:18px; margin-bottom:6px; letter-spacing:2px; }
+  .lock-box .lock-sub { color:var(--text-dim); font-size:12px; margin-bottom:20px; }
+  .lock-box input { width:100%; padding:10px 14px; background:#0d0c09; border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:15px; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; transition:border-color .3s; }
+  .lock-box input:focus { border-color:var(--gold); }
+  .lock-box .lock-btn { margin-top:14px; width:100%; padding:10px; background:var(--gold); color:#0d0c09; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; font-family:inherit; letter-spacing:2px; transition:opacity .3s; }
+  .lock-box .lock-btn:hover { opacity:0.85; }
+  .lock-box .lock-err { color:#c44; font-size:12px; margin-top:10px; min-height:18px; }
+  .lock-hidden { display:none !important; }
+
+  /* 农历卡片 */
+  .lunar-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; text-align:center; transition:all .3s; grid-column:span 2; }
+  .lunar-card:hover { border-color:var(--bronze); }
+  .lunar-card .lunar-date { font-size:22px; color:var(--gold-light); font-weight:bold; }
+  .lunar-card .lunar-ganzhi { font-size:13px; color:var(--jade); margin-top:4px; }
+  .lunar-card .lunar-detail { font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+  /* 折线图 */
+  .chart-wrap { position:relative; width:100%; }
+  .chart-wrap canvas { width:100%; height:260px; display:block; }
+  .chart-legend { display:flex; gap:20px; justify-content:center; margin-top:8px; font-size:12px; }
+  .chart-legend span { display:flex; align-items:center; gap:6px; }
+  .chart-legend .dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+
+  /* 热力图 */
+  .heatmap-wrap { overflow-x:auto; }
+  .heatmap-grid { display:grid; gap:1px; }
+  .heatmap-cell { aspect-ratio:1; border-radius:2px; cursor:pointer; transition:transform .15s; position:relative; }
+  .heatmap-cell:hover { transform:scale(1.4); z-index:2; }
+  .heatmap-tooltip { display:none; position:fixed; background:#1a1712; border:1px solid var(--gold); border-radius:6px; padding:8px 12px; font-size:12px; color:var(--text); z-index:999; pointer-events:none; white-space:nowrap; }
+  .heatmap-axis { display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:4px; }
+  .heatmap-label { font-size:10px; color:var(--text-dim); writing-mode:vertical-lr; text-orientation:mixed; }
+
+  /* 异常标记 */
+  .anomaly-row { background:rgba(200,80,50,0.12) !important; }
+  .anomaly-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:rgba(200,80,50,0.25); color:#e87a5a; }
+
+  /* 导出按钮 */
+  .export-btn { background:var(--jade); color:#0d0c09; border:none; padding:6px 16px; border-radius:6px; font-size:13px; cursor:pointer; font-family:inherit; font-weight:bold; }
+  .export-btn:hover { opacity:0.85; }
+
+  /* 在线人数 */
+  .online-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#5a8a6a; margin-right:6px; animation:pulse-online 2s infinite; }
+  @keyframes pulse-online { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* 动爻位置 */
+  .yao-pos-grid { display:flex; gap:4px; align-items:flex-end; height:120px; justify-content:center; }
+  .yao-pos-col { flex:1; max-width:60px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+  .yao-pos-bar { width:100%; background:linear-gradient(180deg,var(--gold),#5a4530); border-radius:3px 3px 0 0; transition:height .5s; }
+  .yao-pos-label { font-size:11px; color:var(--text-dim); margin-top:6px; }
+  .yao-pos-count { font-size:12px; color:var(--gold-light); }
+
+  /* 64卦覆盖率仪表盘 */
+  .coverage-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:2px; max-width:640px; margin:0 auto; }
+  .coverage-cell { aspect-ratio:1; border-radius:3px; cursor:pointer; transition:transform .2s,box-shadow .2s; position:relative; display:flex; align-items:center; justify-content:center; }
+  .coverage-cell:hover { transform:scale(1.25); z-index:2; box-shadow:0 0 12px rgba(200,168,76,0.5); }
+  .coverage-cell .gua-name { font-size:10px; color:inherit; opacity:0; transition:opacity .2s; text-align:center; line-height:1.2; }
+  .coverage-cell:hover .gua-name { opacity:1; }
+  .coverage-legend { display:flex; gap:20px; justify-content:center; margin-top:10px; font-size:11px; color:var(--text-dim); }
+  .coverage-legend span { display:flex; align-items:center; gap:6px; }
+  .coverage-legend .swatch { display:inline-block; width:12px; height:12px; border-radius:2px; }
 </style>
 </head>
 <body>
-<h1>☯ 八卦占卜 · 数据面板</h1>
-<div class="nav">
-  <a href="javascript:location.reload()">🔄 刷新</a> |
-  <a href="index.html">🏠 返回首页</a> |
-  <a href="javascript:if(confirm('确定清空所有数据？')){localStorage.removeItem('bagua_tracker_data');location.reload();}">🗑 清空数据</a>
+<!-- 密码锁屏 -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h2>数据面板</h2>
+    <div class="lock-sub">请输入密码以查看统计数据</div>
+    <input type="password" id="pwdInput" placeholder="••••••" autofocus onkeydown="if(event.key==='Enter')unlock()">
+    <button class="lock-btn" onclick="unlock()">解 锁</button>
+    <div class="lock-err" id="lockErr"></div>
+  </div>
 </div>
-<div id="app"><div class="empty"><div class="icon">📊</div>加载中...</div></div>
-<div class="note">⚠ 数据存储在您浏览器的 localStorage 中，不会被上传到任何服务器。<br>清空浏览器缓存会导致数据丢失。</div>
+
+<div class="container lock-hidden" id="mainContent">
+<h1>☯ 八卦占卜 · 在线数据面板</h1>
+<div class="subtitle">所有用户数据汇总（Supabase 云端）</div>
+<div class="nav">
+  <button onclick="refresh()" class="active" id="refreshBtn">🔄 刷新数据</button>
+  <button onclick="toggleMode()" id="modeBtn">📊 切换视图</button>
+  <button onclick="exportCSV()" class="export-btn">📥 导出CSV</button>
+  <a href="index.html">🏠 返回首页</a>
+</div>
+<div id="app"><div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div></div>
+<div class="note">📡 数据存储在 Supabase 云端，展示所有用户的占卜记录</div>
+</div>
 
 <script>
-(function() {
-  const STORAGE_KEY = 'bagua_tracker_data';
+// ===== 安全配置 =====
+// 使用 Supabase Edge Function 作为安全数据代理（替代 CloudStudio proxy-server）
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://vaxqenkobsflatavmpta.supabase.co/functions/v1/admin-api';
 
-  function loadData() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {visits:[],divinations:[],leaves:[]}; }
-    catch(e) { return {visits:[],divinations:[],leaves:[]}; }
+let authToken = sessionStorage.getItem('bagua_admin_token') || '';
+let currentMode = 'full';
+
+// 带 token 的 fetch
+async function apiFetch(path) {
+  const resp = await fetch(API_BASE + path, {
+    headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {}
+  });
+  if (resp.status === 401) {
+    authToken = '';
+    sessionStorage.removeItem('bagua_admin_token');
+    document.getElementById('lockScreen').classList.remove('lock-hidden');
+    document.getElementById('mainContent').classList.add('lock-hidden');
+    throw new Error('登录已过期，请重新输入密码');
+  }
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || '请求失败: ' + resp.status);
+  }
+  return resp.json();
+}
+
+async function unlock() {
+  const input = document.getElementById('pwdInput').value;
+  const err = document.getElementById('lockErr');
+  const btn = document.querySelector('.lock-btn');
+  if (!input) { err.textContent = '请输入密码'; return; }
+  btn.disabled = true;
+  btn.textContent = '验证中...';
+  try {
+    const data = await apiFetchLogin(input);
+    if (data.token) {
+      authToken = data.token;
+      sessionStorage.setItem('bagua_admin_token', authToken);
+      document.getElementById('lockScreen').classList.add('lock-hidden');
+      document.getElementById('mainContent').classList.remove('lock-hidden');
+      refresh();
+    }
+  } catch(e) {
+    err.textContent = '密码错误或网络不通';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+  btn.disabled = false;
+  btn.textContent = '解 锁';
+}
+
+// 登录（不经过 apiFetch，因为还没 token）
+async function apiFetchLogin(password) {
+  const resp = await fetch(API_BASE + '/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  if (!resp.ok) throw new Error('login failed');
+  return resp.json();
+}
+
+// 将 Supabase 时间字符串转为北京时间显示
+// Supabase 存的是 UTC+0 ISO 格式（如 "2026-06-11T08:13:48+00:00" 或 "2026-06-11 09:30:00"）
+function toBeijingTime(timeStr) {
+  if (!timeStr) return '';
+  // 兼容两种格式：带时区的 ISO 和旧版空格分隔格式
+  const normalized = timeStr.replace(' ', 'T');
+  const d = new Date(normalized.includes('+') || normalized.includes('Z') ? normalized : normalized + '+00:00');
+  if (isNaN(d.getTime())) return timeStr; // 解析失败时返回原值
+  const bj = new Date(d.getTime() + 8 * 3600000);
+  return bj.toISOString().replace('T', ' ').slice(0, 19);
+}
+
+function toggleMode() {
+  currentMode = currentMode === 'full' ? 'compact' : 'full';
+  document.getElementById('modeBtn').textContent = currentMode === 'full' ? '📊 紧凑视图' : '📊 展开视图';
+  refresh();
+}
+
+// 农历缓存
+let lunarCache = null;
+
+async function fetchLunar() {
+  if (lunarCache) return lunarCache;
+  try {
+    const resp = await fetch('https://api.530.news/api/lunar?date=today&timezone=8');
+    const json = await resp.json();
+    if (json.code === 200) {
+      lunarCache = json.data;
+      return lunarCache;
+    }
+  } catch(e) {
+    console.warn('农历API获取失败:', e.message);
+  }
+  return null;
+}
+
+async function refresh() {
+  const app = document.getElementById('app');
+  const btn = document.getElementById('refreshBtn');
+  if (!authToken) {
+    document.getElementById('lockScreen').classList.remove('lock-hidden');
+    document.getElementById('mainContent').classList.add('lock-hidden');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ 加载中...';
+  app.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在从云端加载数据...</p></div>';
+
+  try {
+    const [visits, divinations, lunar] = await Promise.all([
+      apiFetch('/data/visits'),
+      apiFetch('/data/divinations'),
+      fetchLunar()
+    ]);
+    render(visits || [], divinations || [], lunar);
+  } catch(e) {
+    app.innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>加载失败</p><p style="font-size:12px;">' + e.message + '</p></div>';
+  }
+  btn.disabled = false;
+  btn.textContent = '🔄 刷新数据';
+}
+
+function render(visits, divinations, lunar) {
+  const app = document.getElementById('app');
+
+  if (visits.length === 0 && divinations.length === 0) {
+    app.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无数据</p><p style="font-size:12px;margin-top:8px;">用户开始占卜后，数据会自动出现在这里</p></div>';
+    return;
   }
 
-  function render() {
-    const data = loadData();
-    const visits = data.visits || [];
-    const divinations = data.divinations || [];
-    const leaves = data.leaves || [];
+  // ===== 基础统计 =====
+  const allSessions = new Set();
+  visits.forEach(v => allSessions.add(v.session_id));
+  divinations.forEach(d => allSessions.add(d.session_id));
+  const visitSessions = new Set(visits.map(v => v.session_id));
+  const divSessions = new Set(divinations.map(d => d.session_id));
 
-    if (visits.length === 0 && divinations.length === 0) {
-      document.getElementById('app').innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无数据</p><p style="font-size:12px;margin-top:8px;">打开首页进行占卜后，数据会出现在这里</p></div>';
-      return;
-    }
+  // 浏览器 / 设备 / 系统
+  const browsers = {}, devices = {}, oses = {}, screenSizes = {}, languages = {}, referrers = {};
+  // 地理位置
+  const countries = {}, regions = {}, cities = {}, isps = {}, timezones = {};
+  visits.forEach(v => {
+    browsers[v.browser] = (browsers[v.browser]||0)+1;
+    devices[v.device] = (devices[v.device]||0)+1;
+    oses[v.os] = (oses[v.os]||0)+1;
+    if (v.screen_size) screenSizes[v.screen_size] = (screenSizes[v.screen_size]||0)+1;
+    if (v.language) languages[v.language] = (languages[v.language]||0)+1;
+    const ref = (v.referrer||'direct').split('/')[2] || v.referrer || 'direct';
+    referrers[ref] = (referrers[ref]||0)+1;
+    // 地理
+    if (v.country) countries[v.country] = (countries[v.country]||0)+1;
+    if (v.region && v.country) regions[v.country + '|' + v.region] = (regions[v.country + '|' + v.region]||0)+1;
+    if (v.city && v.region) cities[v.region + '|' + v.city] = (cities[v.region + '|' + v.city]||0)+1;
+    if (v.isp) isps[v.isp] = (isps[v.isp]||0)+1;
+    if (v.timezone) timezones[v.timezone] = (timezones[v.timezone]||0)+1;
+  });
 
-    // 统计
-    const sessions = new Set();
-    visits.forEach(v => sessions.add(v.session_id));
-    const browsers = {}, devices = {}, oses = {};
-    visits.forEach(v => {
-      browsers[v.browser] = (browsers[v.browser]||0)+1;
-      devices[v.device] = (devices[v.device]||0)+1;
-      oses[v.os] = (oses[v.os]||0)+1;
-    });
-    const guaCounts = {}, methodCounts = {};
-    divinations.forEach(d => {
-      guaCounts[d.ben_gua_name] = (guaCounts[d.ben_gua_name]||0)+1;
+  // 占卜统计
+  const methodCounts = {}, guaCounts = {}, benGuaKeys = {}, bianGuaCounts = {};
+  const upperTrigrams = {}, lowerTrigrams = {};
+  const changeLineCounts = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+  let withChange = 0, withoutChange = 0;
+  const hourCounts = {};
+  const weekdayCounts = {};
+  const questions = [];
+  // 新增统计
+  const yaoTypeCounts = { '少阳':0, '少阴':0, '老阳':0, '老阴':0 }; // 爻型分布
+  const upperLowerPairs = {}; // 上下卦配对
+  const benGuaCountsByKey = {}; // 按六爻键值的本卦分布
+  const methodWithChange = {}; // 各方法的变爻率
+
+  divinations.forEach(d => {
+    // 方法
+    if (d.method) {
       methodCounts[d.method] = (methodCounts[d.method]||0)+1;
-    });
-    const topGua = Object.entries(guaCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    let totalDuration = 0, durCount = 0;
-    leaves.forEach(l => { if(l.duration_seconds>0&&l.duration_seconds<86400){totalDuration+=l.duration_seconds;durCount++;} });
-    const avgDur = durCount ? Math.round(totalDuration/durCount) : 0;
+      if (!methodWithChange[d.method]) methodWithChange[d.method] = { total:0, changed:0 };
+      methodWithChange[d.method].total++;
+    }
+    // 本卦
+    if (d.ben_gua_name) guaCounts[d.ben_gua_name] = (guaCounts[d.ben_gua_name]||0)+1;
+    if (d.ben_gua_key) {
+      benGuaKeys[d.ben_gua_key] = (benGuaKeys[d.ben_gua_key]||0)+1;
+      benGuaCountsByKey[d.ben_gua_key] = (benGuaCountsByKey[d.ben_gua_key]||0)+1;
+    }
+    // 变卦
+    if (d.bian_gua_name) bianGuaCounts[d.bian_gua_name] = (bianGuaCounts[d.bian_gua_name]||0)+1;
+    // 上卦/下卦
+    if (d.ben_gua_upper) upperTrigrams[d.ben_gua_upper] = (upperTrigrams[d.ben_gua_upper]||0)+1;
+    if (d.ben_gua_lower) lowerTrigrams[d.ben_gua_lower] = (lowerTrigrams[d.ben_gua_lower]||0)+1;
+    // 上下卦配对
+    if (d.ben_gua_upper && d.ben_gua_lower) {
+      const pairKey = d.ben_gua_upper + '上·' + d.ben_gua_lower + '下';
+      upperLowerPairs[pairKey] = (upperLowerPairs[pairKey]||0)+1;
+    }
+    // 动爻
+    const cc = d.change_count !== null && d.change_count !== undefined ? d.change_count : (d.changing_lines ? d.changing_lines.split(',').filter(x=>x!=='').length : 0);
+    if (cc > 0) {
+      withChange++;
+      if (d.method && methodWithChange[d.method]) methodWithChange[d.method].changed++;
+    } else {
+      withoutChange++;
+    }
+    if (changeLineCounts[cc] !== undefined) changeLineCounts[cc]++;
+    else changeLineCounts[cc] = 1;
+    // 爻型统计（从 yao_results JSON 解析）
+    if (d.yao_results) {
+      try {
+        const yaoArr = JSON.parse(d.yao_results);
+        yaoArr.forEach(y => {
+          if (y.type && yaoTypeCounts[y.type] !== undefined) yaoTypeCounts[y.type]++;
+        });
+      } catch(e) {}
+    }
+    // 时段
+    if (d.time) {
+      const bjTime = toBeijingTime(d.time);
+      const h = new Date(bjTime.replace(' ','T')).getHours();
+      hourCounts[h] = (hourCounts[h]||0)+1;
+      const wd = new Date(bjTime.replace(' ','T')).getDay();
+      weekdayCounts[wd] = (weekdayCounts[wd]||0)+1;
+    }
+    // 问题
+    if (d.question) questions.push({q:d.question, time:d.time, gua:d.ben_gua_name});
+  });
 
-    let html = '';
+  // ===== 排序辅助 =====
+  const sortByVal = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+  const maxOf = arr => arr.length ? arr[0][1] : 1;
 
-    html += '<div class="cards">';
-    html += `<div class="card"><div class="num">${visits.length}</div><div class="label">总访问次数</div></div>`;
-    html += `<div class="card"><div class="num">${sessions.size}</div><div class="label">独立会话数</div></div>`;
-    html += `<div class="card"><div class="num">${divinations.length}</div><div class="label">总占卜次数</div></div>`;
-    html += `<div class="card"><div class="num">${avgDur}秒</div><div class="label">平均停留时长</div></div>`;
+  // 暴露到全局作用域供 renderCompact 等外部函数使用
+  window._sortByVal = sortByVal;
+  window._maxOf = maxOf;
+
+  let html = '';
+
+  // ==================== 概览卡片（丰富版） ====================
+  html += '<div class="cards">';
+  html += `<div class="card"><div class="num">${visits.length}</div><div class="label">📈 总访问次数</div></div>`;
+  html += `<div class="card"><div class="num">${visitSessions.size}</div><div class="label">👤 独立访客数</div></div>`;
+  html += `<div class="card"><div class="num">${divinations.length}</div><div class="label">🔮 总占卜次数</div></div>`;
+  html += `<div class="card"><div class="num">${divSessions.size}</div><div class="label">🔮 占卜用户数</div></div>`;
+  const avgDiv = divSessions.size ? (divinations.length / divSessions.size).toFixed(1) : '0';
+  html += `<div class="card"><div class="num">${avgDiv}</div><div class="label">👤 人均占卜</div></div>`;
+  const visitRate = visitSessions.size ? ((divSessions.size / visitSessions.size)*100).toFixed(0) : '0';
+  html += `<div class="card"><div class="num">${visitRate}%</div><div class="label">🎯 访问转化率</div></div>`;
+  const changeRate = divinations.length ? ((withChange / divinations.length)*100).toFixed(0) : '0';
+  html += `<div class="card"><div class="num">${changeRate}%</div><div class="label">🔄 有变爻比例</div></div>`;
+  html += `<div class="card"><div class="num">${Object.keys(guaCounts).length}</div><div class="label">📚 覆盖卦象数</div><div class="sub">/ 64</div></div>`;
+  // 实时在线
+  const onlineCount = countOnline(visits);
+  html += `<div class="card"><div class="num"><span class="online-dot"></span>${onlineCount}</div><div class="label">🟢 近5分钟在线</div></div>`;
+  html += '</div>';
+
+  // ==================== 农历信息卡片 ====================
+  if (lunar) {
+    const festivals = lunar.festival && lunar.festival.length > 0 ? ' · ' + lunar.festival.join('、') : '';
+    html += '<div class="lunar-card">';
+    html += `<div class="lunar-date">📅 ${lunar.solar.year}年${lunar.solar.month}月${lunar.solar.day}日 ${lunar.weekDay}</div>`;
+    html += `<div class="lunar-ganzhi">农历 ${lunar.lunarMonthName}${lunar.lunarDayName}${festivals}</div>`;
+    html += `<div class="lunar-detail">${lunar.yearInGanZhi}年（${lunar.zodiac}） · ${lunar.monthInGanZhi}月 · ${lunar.dayInGanZhi}日</div>`;
     html += '</div>';
-
-    html += '<div class="section"><h2>🌐 浏览器分布</h2><table>';
-    Object.entries(browsers).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{html+=`<tr><td>${k}</td><td>${v}次</td></tr>`;});
-    html += '</table></div>';
-
-    html += '<div class="section"><h2>💻 操作系统</h2><table>';
-    Object.entries(oses).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{html+=`<tr><td>${k}</td><td>${v}次</td></tr>`;});
-    html += '</table></div>';
-
-    html += '<div class="section"><h2>📱 设备类型</h2><table>';
-    Object.entries(devices).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{html+=`<tr><td>${k}</td><td>${v}次</td></tr>`;});
-    html += '</table></div>';
-
-    if (topGua.length) {
-      html += '<div class="section"><h2>🏆 热门卦象 Top 10</h2><table>';
-      topGua.forEach(([k,v],i)=>{html+=`<tr><td>${i+1}</td><td>${k}</td><td>${v}次</td></tr>`;});
-      html += '</table></div>';
-    }
-
-    if (Object.keys(methodCounts).length) {
-      html += '<div class="section"><h2>🎯 占卜方法</h2><table>';
-      const methodNames = {shicao:'大衍蓍草',coin:'三钱代蓍',meihua:'梅花易数'};
-      Object.entries(methodCounts).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{html+=`<tr><td>${methodNames[k]||k}</td><td>${v}次</td></tr>`;});
-      html += '</table></div>';
-    }
-
-    if (divinations.length) {
-      html += '<div class="section"><h2>📋 最近占卜记录</h2><div class="recent"><table>';
-      html += '<tr><th>时间</th><th>卦象</th><th>方法</th><th>动爻</th></tr>';
-      const methodNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
-      [...divinations].reverse().slice(0,50).forEach(d=>{
-        html += `<tr><td>${d.time||''}</td><td>${d.ben_gua_name||''}</td><td>${methodNames[d.method]||d.method||''}</td><td>${d.changing_lines||'无'}</td></tr>`;
-      });
-      html += '</table></div></div>';
-    }
-
-    document.getElementById('app').innerHTML = html;
   }
 
-  document.addEventListener('DOMContentLoaded', render);
-})();
+  // ==================== 64卦覆盖率仪表盘 ====================
+  const GUA64_NAMES = ['乾为天','坤为地','水雷屯','山水蒙','水天需','天水讼','地水师','水地比','风天小畜','天泽履','地天泰','天地否','天火同人','火天大有','地山谦','雷地豫','泽雷随','山风蛊','地泽临','风地观','火雷噬嗑','山火贲','山地剥','地雷复','天雷无妄','山天大畜','山雷颐','泽风大过','坎为水','离为火','泽山咸','雷风恒','天山遁','雷天大壮','火地晋','地火明夷','风火家人','火泽睽','水山蹇','雷水解','山泽损','风雷益','泽天夬','天风姤','泽地萃','地风升','泽水困','水风井','泽火革','火风鼎','震为雷','艮为山','风山渐','雷泽归妹','雷火丰','火山旅','巽为风','兑为泽','风水涣','水泽节','风泽中孚','雷山小过','水火既济','火水未济'];
+  const GUA64_COLORS = ['#e8d38c','#b8a878','#4a80b4','#8b7355','#4a80b4','#c9a84c','#b8a878','#4a80b4','#5e9e8c','#c9a84c','#b8a878','#c9a84c','#c9a84c','#e07050','#b8a878','#7eb860','#c9a96e','#8b7355','#b8a878','#5e9e8c','#e07050','#8b7355','#8b7355','#b8a878','#c9a84c','#8b7355','#8b7355','#c9a96e','#4a80b4','#e07050','#c9a96e','#7eb860','#c9a84c','#7eb860','#e07050','#b8a878','#5e9e8c','#e07050','#4a80b4','#7eb860','#8b7355','#5e9e8c','#c9a96e','#c9a84c','#c9a96e','#b8a878','#c9a96e','#4a80b4','#c9a96e','#e07050','#7eb860','#8b7355','#5e9e8c','#7eb860','#7eb860','#e07050','#5e9e8c','#c9a96e','#5e9e8c','#4a80b4','#5e9e8c','#7eb860','#4a80b4','#e07050'];
+  const maxGua = Math.max(1, ...Object.values(guaCounts));
+  html += '<div class="section"><h2>📊 64卦覆盖率仪表盘 <span style="font-weight:normal;font-size:12px;color:var(--text-dim)">（' + Object.keys(guaCounts).length + '/64）</span></h2>';
+  html += '<div class="coverage-grid">';
+  GUA64_NAMES.forEach((name,i) => {
+    const count = guaCounts[name] || 0;
+    if (count > 0) {
+      const intensity = 0.2 + (count / maxGua) * 0.8;
+      html += `<div class="coverage-cell" style="background:rgba(200,168,76,${intensity.toFixed(2)});color:#fff" title="${name}: ${count}次"><span class="gua-name">${name.slice(0,2)}</span></div>`;
+    } else {
+      html += `<div class="coverage-cell" style="background:rgba(46,40,32,0.5);color:#5a5040" title="${name}: 未出现"><span class="gua-name">${name.slice(0,2)}</span></div>`;
+    }
+  });
+  html += '</div>';
+  html += '<div class="coverage-legend"><span><span class="swatch" style="background:rgba(46,40,32,0.5)"></span>未出现</span><span><span class="swatch" style="background:rgba(200,168,76,0.3)"></span>较少</span><span><span class="swatch" style="background:rgba(200,168,76,0.8)"></span>热门</span></div>';
+  html += '</div>';
+
+  // ==================== 每日趋势折线图（Canvas） ====================
+  const dailyVisits = {}, dailyDivs = {};
+  visits.forEach(v => {
+    const day = toBeijingTime(v.time).slice(0,10);
+    if (day) dailyVisits[day] = (dailyVisits[day]||0)+1;
+  });
+  divinations.forEach(d => {
+    const day = toBeijingTime(d.time).slice(0,10);
+    if (day) dailyDivs[day] = (dailyDivs[day]||0)+1;
+  });
+  const allDays = new Set([...Object.keys(dailyVisits), ...Object.keys(dailyDivs)]);
+  const sortedDays = [...allDays].sort();
+  if (sortedDays.length) {
+    html += '<div class="section"><h2>📈 每日趋势折线图</h2>';
+    html += `<div class="chart-wrap"><canvas id="trendChart" data-days="${sortedDays.join(',')}" data-visits="${sortedDays.map(d=>dailyVisits[d]||0).join(',')}" data-divs="${sortedDays.map(d=>dailyDivs[d]||0).join(',')}"></canvas></div>`;
+    html += '<div class="chart-legend"><span><span class="dot" style="background:var(--gold-light)"></span>访问量</span><span><span class="dot" style="background:var(--jade)"></span>占卜量</span></div>';
+    html += '</div>';
+  }
+
+  // ==================== 用户留存分析 ====================
+  const retentionData = analyzeRetention(visits, divinations);
+  html += '<div class="section"><h2>👥 用户留存分析</h2>';
+  html += '<div class="pie-grid">';
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.returnRate}%</div><div class="pie-name">🔁 回头客比例</div><div class="pie-pct">${retentionData.returnUsers}/${retentionData.totalUsers} 人</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.avgVisitsPerUser}</div><div class="pie-name">📊 人均回访次数</div><div class="pie-pct">中位数: ${retentionData.medianVisits}</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.avgInterval}</div><div class="pie-name">⏱ 平均间隔</div><div class="pie-pct">天（回访用户间）</div></div>`;
+  html += `<div class="pie-item"><div class="pie-num">${retentionData.onceOnly}</div><div class="pie-name">🕐 仅访问一次</div><div class="pie-pct">${((retentionData.onceOnly/retentionData.totalUsers)*100).toFixed(0)}%</div></div>`;
+  html += '</div></div>';
+
+  // ==================== 爻型分布（老阳/老阴/少阳/少阴） ====================
+  const totalYao = Object.values(yaoTypeCounts).reduce((a,b)=>a+b,0);
+  if (totalYao > 0) {
+    html += '<div class="section"><h2>☯ 爻型分布（六爻中每种爻出现的次数）</h2>';
+    html += '<div class="pie-grid">';
+    const yaoColors = { '少阳':'#c9a84c', '少阴':'#5a8a6a', '老阳':'#e74c3c', '老阴':'#3498db' };
+    const yaoIcons = { '少阳':'⚊', '少阴':'⚋', '老阳':'⚊○', '老阴':'⚋×' };
+    ['少阳','少阴','老阳','老阴'].forEach(type => {
+      const v = yaoTypeCounts[type]||0;
+      html += `<div class="pie-item"><div class="pie-num" style="color:${yaoColors[type]}">${yaoIcons[type]} ${v}</div><div class="pie-name">${type}</div><div class="pie-pct">${((v/totalYao)*100).toFixed(1)}%</div></div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // ==================== 各方法变爻率 ====================
+  const methodNames = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
+  if (Object.keys(methodWithChange).length) {
+    html += '<div class="section"><h2>🎯 各方法变爻率对比</h2><table>';
+    const mRateSorted = Object.entries(methodWithChange).sort((a,b) => {
+      const ra = a[1].total ? a[1].changed/a[1].total : 0;
+      const rb = b[1].total ? b[1].changed/b[1].total : 0;
+      return rb - ra;
+    });
+    mRateSorted.forEach(([k,v]) => {
+      const rate = v.total ? ((v.changed/v.total)*100).toFixed(0) : '0';
+      html += `<tr><td>${methodNames[k]||k}</td><td><div class="bar-wrap"><div class="bar warn" style="width:${Math.max(20,rate*2)}px"></div><span class="bar-count">${v.changed}/${v.total} 有变爻 (${rate}%)</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 上下卦配对 TOP ====================
+  const topPairs = sortByVal(upperLowerPairs).slice(0, 12);
+  if (topPairs.length) {
+    html += '<div class="section"><h2>☯ 本卦上下卦配对 TOP12</h2><table>';
+    const maxP = maxOf(topPairs);
+    topPairs.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxP)*220)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 地理位置分布 ====================
+  const countrySorted = sortByVal(countries);
+  if (countrySorted.length) {
+    html += '<div class="section"><h2>🌍 访客地理分布</h2>';
+    html += '<div class="row">';
+    html += buildBarSection('🗺 国家/地区', countries, 130);
+    const regionSorted = sortByVal(regions).slice(0, 10);
+    if (regionSorted.length) {
+      const regionObj = {};
+      regionSorted.forEach(([k,v]) => { const parts = k.split('|'); regionObj[parts[1] + ' (' + parts[0] + ')'] = v; });
+      html += buildBarSection('📍 省份/州 TOP10', regionObj, 130);
+    }
+    html += '</div>';
+    const citySorted = sortByVal(cities).slice(0, 12);
+    if (citySorted.length) {
+      html += '<div class="row">';
+      const cityObj = {};
+      citySorted.forEach(([k,v]) => { const parts = k.split('|'); cityObj[parts[1] + ' (' + parts[0] + ')'] = v; });
+      html += buildBarSection('🏙 城市 TOP12', cityObj, 130);
+      html += buildBarSection('📡 ISP 运营商', isps, 130);
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  if (currentMode === 'compact') {
+    html += renderCompact(visits, divinations, {browsers,devices,oses,methodCounts,guaCounts,bianGuaCounts,hourCounts,changeLineCounts,withChange,withoutChange,questions,upperTrigrams,lowerTrigrams,screenSizes,languages,referrers,weekdayCounts});
+    app.innerHTML = html;
+    return;
+  }
+
+  // ==================== 时段分布 ====================
+  html += '<div class="section"><h2>🕐 占卜时段分布（24小时）</h2>';
+  const maxHour = Math.max(1, ...Object.values(hourCounts));
+  html += '<div class="hour-bar" style="margin-bottom:24px">';
+  for (let h=0; h<24; h++) {
+    const v = hourCounts[h]||0;
+    const pct = Math.max(4, (v/maxHour)*100);
+    html += `<div class="hour-col" style="height:${pct}%" title="${h}时: ${v}次"><span>${h}</span></div>`;
+  }
+  html += '</div>';
+
+  // 星期分布
+  const wdNames = ['日','一','二','三','四','五','六'];
+  const wdSorted = sortByVal(weekdayCounts);
+  const maxWd = maxOf(wdSorted);
+  html += '<table style="margin-top:10px">';
+  wdSorted.forEach(([k,v])=>{
+    html += `<tr><td>星期${wdNames[parseInt(k)]}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(20,(v/maxWd)*200)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
+  });
+  html += '</table></div>';
+
+  // ==================== 浏览器 / 设备 / 系统 / 屏幕 ====================
+  html += '<div class="row">';
+  html += buildBarSection('🌐 浏览器分布', browsers, 100);
+  html += buildBarSection('📱 设备类型', devices, 100);
+  html += '</div>';
+
+  html += '<div class="row">';
+  html += buildBarSection('💻 操作系统', oses, 140);
+  html += buildBarSection('🖥 屏幕分辨率', screenSizes, 140);
+  html += '</div>';
+
+  // 语言 & 来源
+  html += '<div class="row">';
+  html += buildBarSection('🗣 浏览器语言', languages, 120);
+  html += buildBarSection('🔗 流量来源', referrers, 140);
+  html += '</div>';
+
+  // ==================== 占卜方法 ====================
+  const methodNames2 = {shicao:'🌿 大衍蓍草',coin:'🪙 三钱代蓍',meihua:'🌸 梅花易数'};
+  const methodSorted = sortByVal(methodCounts);
+  if (methodSorted.length) {
+    html += '<div class="section"><h2>🎯 占卜方法偏好</h2><table>';
+    const maxM = maxOf(methodSorted);
+    methodSorted.forEach(([k,v])=>{
+      html += `<tr><td>${methodNames2[k]||k}</td><td><div class="bar-wrap"><div class="bar pct" style="width:${Math.max(20,(v/maxM)*180)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(0)}%)</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 六爻键值分布（本卦） ====================
+  const topBenKeys = sortByVal(benGuaCountsByKey).slice(0, 12);
+  if (topBenKeys.length) {
+    html += '<div class="section"><h2>🔑 六爻键值 TOP12（本卦）</h2>';
+    html += '<div class="trigram-list" style="line-height:2">';
+    const maxBK = maxOf(topBenKeys);
+    topBenKeys.forEach(([key,count]) => {
+      // 找对应的卦名
+      const guaName = findGuaName(key);
+      const yaoDisplay = key.split('').map(c => c==='1'?'<span style="color:var(--gold-light)">⚊</span>':'<span style="color:var(--text-dim)">⚋</span>').join('');
+      const size = 13 + Math.floor((count/maxBK)*8);
+      html += `<span style="font-size:${size}px;margin:0 6px;display:inline-block;white-space:nowrap" title="${guaName}: ${count}次">${yaoDisplay} <span style="color:var(--gold-light);font-size:${size-2}px">${guaName||'?'}</span> <span style="color:var(--text-dim);font-size:11px">×${count}</span></span>`;
+    });
+    html += '</div></div>';
+  }
+
+  // ==================== 动爻统计 ====================
+  html += '<div class="section"><h2>🎲 动爻数量分布</h2>';
+  html += '<div class="pie-grid">';
+  const clSorted = Object.entries(changeLineCounts).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  clSorted.forEach(([k,v])=>{
+    const label = k === '0' ? '静卦(无动爻)' : k + '个动爻';
+    html += `<div class="pie-item"><div class="pie-num">${v}</div><div class="pie-name">${label}</div><div class="pie-pct">${((v/divinations.length)*100).toFixed(0)}%</div></div>`;
+  });
+  html += '</div></div>';
+
+  // ==================== 上卦/下卦分布 ====================
+  html += '<div class="row">';
+  html += buildBarSection('☰ 本卦上卦（外卦）分布', upperTrigrams, 130);
+  html += buildBarSection('☷ 本卦下卦（内卦）分布', lowerTrigrams, 130);
+  html += '</div>';
+
+  // ==================== 热门本卦 ====================
+  const topGua = sortByVal(guaCounts).slice(0, 15);
+  if (topGua.length) {
+    html += '<div class="section"><h2>🏆 热门本卦 TOP15</h2><table>';
+    const maxG = maxOf(topGua);
+    topGua.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxG)*220)}px"></div><span class="bar-count">${v}次 (${((v/divinations.length)*100).toFixed(1)}%)</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 热门变卦 ====================
+  const topBian = sortByVal(bianGuaCounts).slice(0, 10);
+  if (topBian.length) {
+    html += '<div class="section"><h2>🔄 热门变卦 TOP10</h2><table>';
+    const maxB = maxOf(topBian);
+    topBian.forEach(([k,v],i)=>{
+      html += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar warn" style="width:${Math.max(16,(v/maxB)*220)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ==================== 最近占卜记录（含完整信息） ====================
+  if (divinations.length) {
+    html += '<div class="section"><h2>📋 最近占卜记录</h2><div class="recent"><table>';
+    html += '<tr><th>时间</th><th>本卦</th><th>变卦</th><th>方法</th><th>动爻</th><th>变爻数</th><th>问题</th></tr>';
+    const mNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
+    divinations.slice(0, 100).forEach(d=>{
+      const question = d.question ? (d.question.length > 20 ? d.question.slice(0,20)+'…' : d.question) : '-';
+      const hasChange = d.has_change || (d.bian_gua_name && d.bian_gua_name !== '');
+      html += `<tr>
+        <td style="white-space:nowrap">${toBeijingTime(d.time).slice(0,16)}</td>
+        <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
+        <td style="color:${hasChange?'var(--gold-light)':'var(--text-dim)'}">${hasChange?(d.bian_gua_name||'?') : '—'}</td>
+        <td>${mNames[d.method]||d.method||''}</td>
+        <td>${d.changing_lines||'无'}</td>
+        <td><span class="badge ${d.change_count>0?'badge-change':'badge-none'}">${d.change_count||0}爻</span></td>
+        <td class="qtext" title="${d.question||''}">${question}</td>
+      </tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
+  // ==================== 最近访问 ====================
+  if (visits.length) {
+    html += '<div class="section"><h2>🌍 最近访问记录</h2><div class="recent"><table>';
+    html += '<tr><th>时间</th><th>Session</th><th>IP</th><th>国家</th><th>地区</th><th>城市</th><th>ISP</th><th>浏览器</th><th>系统</th><th>设备</th></tr>';
+    visits.slice(0, 50).forEach(v=>{
+      html += `<tr>
+        <td style="white-space:nowrap">${toBeijingTime(v.time).slice(0,16)}</td>
+        <td style="font-size:11px;color:var(--text-dim)">${(v.session_id||'').slice(-10)}</td>
+        <td style="font-size:11px;color:var(--text-dim);max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${v.ip||''}">${v.ip||'—'}</td>
+        <td>${v.country||'—'}</td>
+        <td>${v.region||'—'}</td>
+        <td>${v.city||'—'}</td>
+        <td style="font-size:11px;color:var(--text-dim);max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${v.isp||''}">${v.isp||'—'}</td>
+        <td>${v.browser||''}</td>
+        <td>${v.os||''}</td>
+        <td>${v.device||''}</td>
+      </tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
+  // ==================== 热门问题 ====================
+  if (questions.length) {
+    html += '<div class="section"><h2>💬 热门问题词频</h2><div class="trigram-list">';
+    // 简单词频统计
+    const wordFreq = {};
+    const stopWords = new Set(['的','了','吗','呢','吧','啊','我','你','他','她','它','这','那','是','会','不','能','可以','一个','什么','怎么','为什么','怎么样','有没有','是不是']);
+    questions.forEach(q => {
+      const words = q.q.replace(/[，。！？、；：""''（）【】《》\s,.!?;:'"()\[\]{}]/g,' ').split(' ').filter(w => w.length >= 1 && !stopWords.has(w));
+      words.forEach(w => { wordFreq[w] = (wordFreq[w]||0)+1; });
+    });
+    const topWords = sortByVal(wordFreq).slice(0, 30);
+    const maxW = maxOf(topWords);
+    topWords.forEach(([w,c]) => {
+      const size = 11 + Math.floor((c/maxW)*14);
+      const alpha = 0.4 + (c/maxW)*0.6;
+      html += `<span style="font-size:${size}px;color:rgba(200,168,76,${alpha.toFixed(2)});margin:0 4px;display:inline-block;line-height:1.8">${w}</span>`;
+    });
+    html += '</div></div>';
+  }
+
+  // ==================== 最热门问题原文 TOP20 ====================
+  if (questions.length) {
+    html += '<div class="section"><h2>💬 最热门问题原文 TOP20</h2><div class="recent" style="max-height:400px"><table>';
+    html += '<tr><th>#</th><th>问题</th><th>时间</th><th>卦象</th></tr>';
+    const qSorted = questions.slice().sort((a,b) => b.q.length - a.q.length ? 0 : 0);
+    // 按问题文本去重，取最近的时间
+    const qMap = {};
+    questions.forEach(q => {
+      if (!qMap[q.q] || q.time > qMap[q.q].time) qMap[q.q] = q;
+    });
+    const uniqueQuestions = Object.values(qMap).sort((a,b) => {
+      // 按问题长度降序（长问题通常更有意义）同时按时间
+      const scoreA = (qMap[a.q] ? Object.keys(qMap).filter(k=>k===a.q).length : 1);
+      return b.q.length - a.q.length;
+    }).slice(0, 20);
+    uniqueQuestions.forEach((q,i) => {
+      html += `<tr><td>${i+1}</td><td class="qtext" style="max-width:400px" title="${q.q}">${q.q}</td><td style="white-space:nowrap;font-size:11px;color:var(--text-dim)">${toBeijingTime(q.time).slice(0,16)}</td><td style="color:var(--gold-light)">${q.gua||'?'}</td></tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
+  // ==================== 动爻位置分布（初爻到上爻） ====================
+  const yaoPosCounts = {1:0,2:0,3:0,4:0,5:0,6:0};
+  divinations.forEach(d => {
+    if (d.changing_lines) {
+      const lines = String(d.changing_lines).split(',').filter(x=>x!=='').map(Number);
+      lines.forEach(l => { if (l>=1 && l<=6) yaoPosCounts[l]++; });
+    }
+  });
+  const totalPosChanges = Object.values(yaoPosCounts).reduce((a,b)=>a+b,0);
+  if (totalPosChanges > 0) {
+    html += '<div class="section"><h2>📍 动爻位置分布（初爻→上爻）</h2>';
+    const maxPos = Math.max(1, ...Object.values(yaoPosCounts));
+    html += '<div class="yao-pos-grid">';
+    const posNames = ['初爻','二爻','三爻','四爻','五爻','上爻'];
+    [1,2,3,4,5,6].forEach(i => {
+      const v = yaoPosCounts[i]||0;
+      const pct = Math.max(6, (v/maxPos)*100);
+      html += `<div class="yao-pos-col"><div class="yao-pos-count">${v}</div><div class="yao-pos-bar" style="height:${pct}%"></div><div class="yao-pos-label">${posNames[i-1]}</div></div>`;
+    });
+    html += '</div>';
+    html += `<div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text-dim)">共 ${totalPosChanges} 次动爻（每爻位出现次数）</div>`;
+    html += '</div>';
+  }
+
+  // ==================== 本卦→变卦转换热力图 ====================
+  const heatmapData = {};
+  divinations.forEach(d => {
+    if (d.ben_gua_name && d.bian_gua_name && d.ben_gua_name !== d.bian_gua_name) {
+      const key = d.ben_gua_name + '|' + d.bian_gua_name;
+      heatmapData[key] = (heatmapData[key]||0)+1;
+    }
+  });
+  const allGuaNames = [...new Set([
+    ...Object.keys(guaCounts),
+    ...Object.keys(bianGuaCounts)
+  ])].sort();
+  if (allGuaNames.length > 0 && Object.keys(heatmapData).length > 0) {
+    html += '<div class="section"><h2>🔥 本卦→变卦转换热力图</h2>';
+    html += '<div class="heatmap-wrap"><div class="heatmap-grid" id="heatmapGrid" style="grid-template-columns:repeat(' + allGuaNames.length + ',1fr)">';
+    const maxHeat = Math.max(1, ...Object.values(heatmapData));
+    allGuaNames.forEach(ben => {
+      allGuaNames.forEach(bian => {
+        const v = heatmapData[ben+'|'+bian]||0;
+        const intensity = v / maxHeat;
+        const r = Math.round(26 + intensity * 174);
+        const g = Math.round(22 + intensity * 146);
+        const b = Math.round(18 + intensity * 58);
+        html += `<div class="heatmap-cell" style="background:rgb(${r},${g},${b})" data-ben="${ben}" data-bian="${bian}" data-val="${v}" onmouseenter="showHeatTooltip(event,this)" onmouseleave="hideHeatTooltip()"></div>`;
+      });
+    });
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:4px">';
+    html += '<span>← 变卦（横向）</span><span>本卦（纵向）↓</span></div>';
+    html += '</div></div>';
+  }
+
+  // ==================== 异常检测 ====================
+  const anomalies = detectAnomalies(divinations);
+  if (anomalies.length > 0) {
+    html += '<div class="section"><h2>⚠️ 异常检测（同 session 短时间大量占卜）</h2>';
+    html += '<div class="recent" style="max-height:350px"><table>';
+    html += '<tr><th>Session</th><th>占卜次数</th><th>时间跨度</th><th>平均间隔</th><th>涉及问题</th></tr>';
+    anomalies.forEach(a => {
+      html += `<tr class="anomaly-row">
+        <td style="font-size:11px;color:var(--text-dim)">${a.session_id.slice(-12)}</td>
+        <td><span class="anomaly-badge">${a.count}次</span></td>
+        <td>${a.duration}秒</td>
+        <td>${a.avgInterval}秒/次</td>
+        <td style="font-size:11px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.questions}">${a.questions}</td>
+      </tr>`;
+    });
+    html += '</table></div></div>';
+  }
+
+  app.innerHTML = html;
+
+  // ==================== 渲染 Canvas 折线图（需要在 DOM 插入后） ====================
+  const trendCanvas = document.getElementById('trendChart');
+  if (trendCanvas) drawTrendChart(trendCanvas);
+
+  // ==================== 热力图 Tooltip ====================
+  if (!document.getElementById('heatTooltip')) {
+    const tt = document.createElement('div');
+    tt.id = 'heatTooltip';
+    tt.className = 'heatmap-tooltip';
+    document.body.appendChild(tt);
+  }
+}
+
+// ===== 紧凑视图 =====
+function renderCompact(visits, divinations, ctx) {
+  let h = '';
+  h += '<div class="row">';
+  h += buildBarSection('🌐 浏览器', ctx.browsers, 100);
+  h += buildBarSection('📱 设备', ctx.devices, 100);
+  h += '</div>';
+  h += buildBarSection('💻 操作系统', ctx.oses, 200);
+
+  const mNames = {shicao:'蓍草',coin:'铜钱',meihua:'梅花'};
+  const topGua = window._sortByVal(ctx.guaCounts).slice(0, 8);
+  if (topGua.length) {
+    h += '<div class="section"><h2>🏆 热门卦象 TOP8</h2><table>';
+    const maxG = topGua[0][1];
+    topGua.forEach(([k,v],i)=>{
+      h += `<tr><td>${i+1}</td><td style="color:var(--gold-light)">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(16,(v/maxG)*160)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+    });
+    h += '</table></div>';
+  }
+
+  if (divinations.length) {
+    h += '<div class="section"><h2>📋 最近占卜</h2><div class="recent"><table>';
+    h += '<tr><th>时间</th><th>本卦</th><th>变卦</th><th>动爻</th><th>问题</th></tr>';
+    divinations.slice(0, 30).forEach(d=>{
+      const question = d.question ? (d.question.length > 15 ? d.question.slice(0,15)+'…' : d.question) : '-';
+      h += `<tr>
+        <td style="white-space:nowrap">${toBeijingTime(d.time).slice(0,16)}</td>
+        <td style="color:var(--gold-light)">${d.ben_gua_name||'?'}</td>
+        <td>${d.bian_gua_name||'—'}</td>
+        <td>${d.changing_lines||'无'}</td>
+        <td class="qtext" title="${d.question||''}">${question}</td>
+      </tr>`;
+    });
+    h += '</table></div></div>';
+  }
+  return h;
+}
+
+// 通过六爻键值查找卦名（如 "111000" → "地天泰"）
+function findGuaName(key) {
+  const map = {
+    '111111':'乾为天','000000':'坤为地','010001':'水雷屯','100010':'山水蒙',
+    '111010':'水天需','010111':'天水讼','010000':'地水师','000010':'水地比',
+    '111011':'风天小畜','110111':'天泽履','111000':'地天泰','000111':'天地否',
+    '101111':'天火同人','111101':'火天大有','001000':'地山谦','000100':'雷地豫',
+    '100110':'泽雷随','011001':'山风蛊','110000':'地泽临','000011':'风地观',
+    '100101':'火雷噬嗑','101001':'山火贲','000001':'山地剥','100000':'地雷复',
+    '100111':'天雷无妄','111001':'山天大畜','100001':'山雷颐','011110':'泽风大过',
+    '010010':'坎为水','101101':'离为火','001110':'泽山咸','110001':'雷风恒',
+    '001111':'天山遁','111100':'雷天大壮','000101':'火地晋','101000':'地火明夷',
+    '101011':'风火家人','110101':'火泽睽','001010':'水山蹇','010100':'雷水解',
+    '110001':'山泽损','100011':'风雷益','111110':'泽天夬','011111':'天风姤',
+    '000110':'泽地萃','011000':'地风升','010110':'泽水困','011010':'水风井',
+    '101110':'泽火革','011101':'火风鼎','001001':'震为雷','100100':'艮为山',
+    '001011':'风山渐','110100':'雷泽归妹','101100':'雷火丰','001101':'火山旅',
+    '011011':'巽为风','110110':'兑为泽','010011':'风水涣','110010':'水泽节',
+    '110011':'风泽中孚','001100':'雷山小过','010101':'水火既济','101010':'火水未济'
+  };
+  return map[key] || '';
+}
+
+function buildBarSection(title, data, barW) {
+  const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
+  if (!sorted.length) return '';
+  const maxV = sorted[0][1];
+  let h = '<div class="col"><div class="section"><h2>' + title + '</h2><table>';
+  sorted.forEach(([k,v])=>{
+    h += `<tr><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${k}">${k}</td><td><div class="bar-wrap"><div class="bar" style="width:${Math.max(14,(v/maxV)*barW)}px"></div><span class="bar-count">${v}次</span></div></td></tr>`;
+  });
+  h += '</table></div></div>';
+  return h;
+}
+
+// ==================== 新功能函数 ====================
+
+// 实时在线人数（近5分钟内有活动的session）
+function countOnline(visits) {
+  const now = Date.now();
+  const fiveMinAgo = now - 5 * 60 * 1000;
+  const activeSessions = new Set();
+  visits.forEach(v => {
+    const t = parseTimeToMs(v.time);
+    if (t && t >= fiveMinAgo) activeSessions.add(v.session_id);
+  });
+  return activeSessions.size;
+}
+
+function parseTimeToMs(timeStr) {
+  if (!timeStr) return null;
+  const d = new Date(timeStr.replace(' ','T').includes('+') || timeStr.includes('Z') ? timeStr.replace(' ','T') : timeStr.replace(' ','T') + '+00:00');
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
+// 用户留存分析
+function analyzeRetention(visits, divinations) {
+  const sessionVisits = {};
+  visits.forEach(v => {
+    if (!sessionVisits[v.session_id]) sessionVisits[v.session_id] = { count:0, times:[] };
+    sessionVisits[v.session_id].count++;
+    const t = parseTimeToMs(v.time);
+    if (t) sessionVisits[v.session_id].times.push(t);
+  });
+  divinations.forEach(d => {
+    if (!sessionVisits[d.session_id]) sessionVisits[d.session_id] = { count:0, times:[] };
+    const t = parseTimeToMs(d.time);
+    if (t) sessionVisits[d.session_id].times.push(t);
+  });
+
+  const sessions = Object.entries(sessionVisits);
+  const totalUsers = sessions.length;
+  const returnUsers = sessions.filter(([_,v]) => v.count > 1).length;
+  const returnRate = totalUsers ? ((returnUsers/totalUsers)*100).toFixed(1) : '0';
+  const onceOnly = sessions.filter(([_,v]) => v.count === 1).length;
+
+  // 人均回访
+  const allCounts = sessions.map(([_,v]) => v.count);
+  const avgVisits = totalUsers ? (allCounts.reduce((a,b)=>a+b,0)/totalUsers).toFixed(1) : '0';
+  allCounts.sort((a,b)=>a-b);
+  const medianVisits = allCounts.length ? allCounts[Math.floor(allCounts.length/2)] : 0;
+
+  // 平均间隔天数
+  let totalIntervals = 0, intervalCount = 0;
+  sessions.forEach(([_,v]) => {
+    if (v.times.length >= 2) {
+      const sorted = v.times.sort((a,b)=>a-b);
+      for (let i=1; i<sorted.length; i++) {
+        totalIntervals += (sorted[i] - sorted[i-1]) / (86400000);
+        intervalCount++;
+      }
+    }
+  });
+  const avgInterval = intervalCount ? totalIntervals/intervalCount : 0;
+
+  return {
+    totalUsers, returnUsers, returnRate, onceOnly,
+    avgVisitsPerUser: avgVisits, medianVisits,
+    avgInterval: avgInterval.toFixed(1) + '天'
+  };
+}
+
+// Canvas 每日趋势折线图
+function drawTrendChart(canvas) {
+  const days = canvas.dataset.days.split(',');
+  const visitsData = canvas.dataset.visits.split(',').map(Number);
+  const divsData = canvas.dataset.divs.split(',').map(Number);
+
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 260 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '260px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = 260;
+  const pad = { top: 20, right: 30, bottom: 50, left: 50 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  // 背景
+  ctx.fillStyle = '#0d0c09';
+  ctx.fillRect(0, 0, W, H);
+
+  const maxV = Math.max(1, ...visitsData, ...divsData);
+  const step = days.length > 1 ? cw / (days.length - 1) : cw;
+
+  // Y轴刻度
+  ctx.strokeStyle = '#2e2820';
+  ctx.lineWidth = 0.5;
+  for (let i=0; i<=4; i++) {
+    const y = pad.top + ch - (ch * i / 4);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#5a5040';
+    ctx.font = '10px "Microsoft YaHei"';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(maxV * i / 4), pad.left - 8, y + 4);
+  }
+
+  // X轴标签
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#5a5040';
+  const xStep = Math.max(1, Math.floor(days.length / 12));
+  for (let i=0; i<days.length; i+=xStep) {
+    const x = pad.left + i * step;
+    ctx.fillText(days[i].slice(5), x, H - 10);
+  }
+
+  // 绘制折线
+  function drawLine(data, color, alpha) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((v,i) => {
+      const x = pad.left + i * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    // 填充
+    ctx.lineTo(pad.left + (data.length-1)*step, pad.top + ch);
+    ctx.lineTo(pad.left, pad.top + ch);
+    ctx.closePath();
+    ctx.fillStyle = color.replace('1)', alpha + ')').replace('rgb','rgba');
+    ctx.fill();
+  }
+  drawLine(divsData, 'rgb(90,138,106)', 0.15);
+  drawLine(visitsData, 'rgb(200,168,76)', 0.1);
+  drawLine(divsData, 'rgb(90,138,106)', 0.15); // re-draw line on top
+  drawLine(visitsData, 'rgb(200,168,76)', 0.1);
+
+  // 重新画线（无填充）
+  [visitsData, divsData].forEach((data,i) => {
+    const color = i===0 ? '#c9a84c' : '#5a8a6a';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((v,j) => {
+      const x = pad.left + j * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      if (j===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  });
+
+  // 数据点
+  [visitsData, divsData].forEach((data,i) => {
+    const color = i===0 ? '#c9a84c' : '#5a8a6a';
+    data.forEach((v,j) => {
+      if (v===0) return;
+      const x = pad.left + j * step;
+      const y = pad.top + ch - (v / maxV) * ch;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI*2);
+      ctx.fill();
+    });
+  });
+}
+
+// 热力图 Tooltip
+function showHeatTooltip(e, cell) {
+  const tt = document.getElementById('heatTooltip');
+  tt.textContent = `${cell.dataset.ben} → ${cell.dataset.bian}: ${cell.dataset.val}次`;
+  tt.style.display = 'block';
+  tt.style.left = (e.clientX + 12) + 'px';
+  tt.style.top = (e.clientY - 30) + 'px';
+}
+function hideHeatTooltip() {
+  const tt = document.getElementById('heatTooltip');
+  if (tt) tt.style.display = 'none';
+}
+
+// 异常检测：同一 session 在短时间内大量占卜
+function detectAnomalies(divinations) {
+  const sessionGroups = {};
+  divinations.forEach(d => {
+    if (!sessionGroups[d.session_id]) sessionGroups[d.session_id] = [];
+    const t = parseTimeToMs(d.time);
+    sessionGroups[d.session_id].push({ time: t, question: d.question, gua: d.ben_gua_name });
+  });
+
+  const results = [];
+  Object.entries(sessionGroups).forEach(([sid, items]) => {
+    if (items.length < 5) return; // 至少5次占卜
+    const sorted = items.filter(x=>x.time).sort((a,b)=>a.time-b.time);
+    if (sorted.length < 5) return;
+    const duration = (sorted[sorted.length-1].time - sorted[0].time) / 1000; // 秒
+    if (duration <= 0) return;
+    const avgInterval = (duration / (sorted.length - 1)).toFixed(1);
+    // 阈值：60秒内5次以上视为异常
+    if (duration <= 60 || (sorted.length >= 10 && duration <= 300)) {
+      results.push({
+        session_id: sid,
+        count: sorted.length,
+        duration: Math.round(duration),
+        avgInterval: avgInterval,
+        questions: sorted.map(x=>x.question||'(空)').join(' | ')
+      });
+    }
+  });
+
+  results.sort((a,b) => b.count - a.count);
+  return results.slice(0, 20);
+}
+
+// 导出 CSV（通过安全代理）
+function exportCSV() {
+  const headers_v = ['session_id','time','browser','os','device','screen_size','language','referrer','ip','country','region','city','isp','timezone'];
+  const headers_d = ['session_id','time','method','ben_gua_name','ben_gua_key','ben_gua_upper','ben_gua_lower','bian_gua_name','bian_gua_key','changing_lines','change_count','has_change','yao_results','question'];
+
+  async function fetchAll() {
+    const [visits, divinations] = await Promise.all([
+      apiFetch('/data/visits'),
+      apiFetch('/data/divinations')
+    ]);
+
+    function toCSV(rows, headers) {
+      const lines = [headers.join(',')];
+      rows.forEach(row => {
+        const vals = headers.map(h => {
+          let v = row[h];
+          if (v === null || v === undefined) return '';
+          v = String(v).replace(/"/g,'""');
+          return '"' + v + '"';
+        });
+        lines.push(vals.join(','));
+      });
+      return lines.join('\n');
+    }
+
+    const csv_v = toCSV(visits, headers_v);
+    const csv_d = toCSV(divinations, headers_d);
+    const blob_v = new Blob(['\uFEFF' + csv_v], { type: 'text/csv;charset=utf-8' });
+    const blob_d = new Blob(['\uFEFF' + csv_d], { type: 'text/csv;charset=utf-8' });
+
+    const now = new Date().toISOString().slice(0,10);
+    ['visits', 'divinations'].forEach((name, i) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(i===0 ? blob_v : blob_d);
+      a.download = `bagua_${name}_${now}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  }
+  fetchAll().catch(e => alert('导出失败: ' + e.message));
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // 如果有缓存 token，先验证是否有效
+  if (authToken) {
+    try {
+      const valid = await apiFetch('/verify');
+      if (valid.valid) {
+        document.getElementById('lockScreen').classList.add('lock-hidden');
+        document.getElementById('mainContent').classList.remove('lock-hidden');
+        refresh();
+        return;
+      }
+    } catch(e) {
+      authToken = '';
+      sessionStorage.removeItem('bagua_admin_token');
+    }
+  }
+  // 没 token 或已过期，显示锁屏
+  document.getElementById('lockScreen').classList.remove('lock-hidden');
+  document.getElementById('mainContent').classList.add('lock-hidden');
+});
 </script>
 </body>
 </html>
