@@ -3003,7 +3003,7 @@ const TRIGRAMS = {
   dui:   { name:'兑', symbol:'☱', element:'金·泽', nature:'悦', yao:[0,1,1], num:2 },
   li:    { name:'离', symbol:'☲', element:'火',   nature:'丽', yao:[1,0,1], num:3 },
   zhen:  { name:'震', symbol:'☳', element:'木·雷', nature:'动', yao:[1,0,0], num:4 },
-  xun:   { name:'巽', symbol:'☴', element:'木·风', nature:'入', yao:[0,1,0], num:5 },
+  xun:   { name:'巽', symbol:'☴', element:'木·风', nature:'入', yao:[0,1,1], num:5 },
   kan:   { name:'坎', symbol:'☵', element:'水',   nature:'陷', yao:[0,1,0], num:6 },
   gen:   { name:'艮', symbol:'☶', element:'土·山', nature:'止', yao:[0,0,1], num:7 },
   kun:   { name:'坤', symbol:'☷', element:'土·地', nature:'顺', yao:[0,0,0], num:8 }
@@ -5027,7 +5027,17 @@ async function startCasting() {
   shootLightPillar();
 
   // 金文铭刻浮现 — 卦名大字
-  const benGuaName = GUA64[benYaoForCrystal.join('')] ? GUA64[benYaoForCrystal.join('')].name : (lg.name || '') + (ug.name || '');
+  const gua64Key = benYaoForCrystal.join('');
+  const gua64Data = GUA64[gua64Key];
+  let benGuaName = '';
+  if (gua64Data && gua64Data.name) {
+    benGuaName = gua64Data.name;
+  } else {
+    benGuaName = (lg.name || '') + (ug.name || '');
+  }
+  if (!benGuaName) {
+    benGuaName = findTrigramName(lowerKey) + findTrigramName(upperKey);
+  }
   showJinwenInscription(benGuaName);
 
   // 卦辞竹简展开
@@ -5305,7 +5315,7 @@ function autoYongshen(liuqinLines) {
 /**
  * 生成六爻排盘HTML表格
  */
-function renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, yongshenType) {
+function renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, yongshenType, guaName) {
   if (!bagongInfo) return '<p style="text-align:center;color:var(--text-dim);">无法识别卦宫</p>';
 
   const yongshenPositions = yongshenType ? autoYongshen(liuqinLines)[yongshenType] || [] : [];
@@ -5365,7 +5375,7 @@ function renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, yongshenType) {
 
       <div class="gong-info">
         卦宫：<span>${bagongInfo.gongName}</span>（${gongWuxing}）&emsp;
-        卦名：<span>${bagongInfo.name}</span>
+        卦名：<span>${guaName || '未知卦'}</span>
       </div>
     </div>
   `;
@@ -5438,7 +5448,7 @@ function showResult(yaoResults) {
   const bagongInfo = findBagong(benKey);
   if (bagongInfo) {
     const liuqinLines = zhuangGua(benYao, bagongInfo);
-    liuyaoPanel.innerHTML = renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, 'qicai');
+    liuyaoPanel.innerHTML = renderLiuyaoTable(yaoResults, bagongInfo, liuqinLines, 'qicai', benGua.name);
   } else {
     liuyaoPanel.innerHTML = '';
   }
