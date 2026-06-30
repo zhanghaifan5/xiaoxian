@@ -479,12 +479,16 @@
     box-shadow: 0 0 30px rgba(200,168,76,0.4), 0 0 60px rgba(200,168,76,0.1), inset 0 0 20px rgba(0,0,0,0.3);
     border: 2px solid rgba(139,125,90,0.35);
     z-index: 10;
-    animation: core-float 3s ease-in-out infinite;
+    animation: core-float 3s ease-in-out infinite, taiji-spin 8s linear infinite;
     pointer-events: none;
   }
   @keyframes core-float {
     0%,100% { box-shadow: 0 0 30px rgba(200,168,76,0.4), 0 0 60px rgba(200,168,76,0.1); }
     50% { box-shadow: 0 0 45px rgba(200,168,76,0.55), 0 0 80px rgba(200,168,76,0.18); }
+  }
+  @keyframes taiji-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   .taiji-core .taiji-dot-top {
     position: absolute;
@@ -1570,6 +1574,1073 @@
     font-style: normal;
     font-weight: 700;
   }
+
+  /* ===== 粒子光环 ===== */
+  .particle-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .particle-ring.active { opacity: 1; }
+  .ring-particle {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 3px;
+    margin: -1.5px 0 0 -1.5px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    animation: ring-orbit 8s linear infinite;
+  }
+  @keyframes ring-orbit {
+    0% { transform: rotate(var(--ra)) translateX(190px) rotate(calc(-1 * var(--ra))); opacity: 0.3; }
+    50% { opacity: 1; box-shadow: 0 0 8px var(--gold-light), 0 0 16px var(--bronze); }
+    100% { transform: rotate(calc(360deg + var(--ra))) translateX(190px) rotate(calc(-360deg - var(--ra))); opacity: 0.3; }
+  }
+
+  /* ===== 阵盘表面飘浮粒子 ===== */
+  .disk-drift-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .drift-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--gold-light);
+    animation: drift-float 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes drift-float {
+    0%, 100% { transform: translate(0, 0); opacity: 0.15; }
+    25% { transform: translate(var(--dx1), var(--dy1)); opacity: 0.6; }
+    50% { transform: translate(var(--dx2), var(--dy2)); opacity: 0.3; }
+    75% { transform: translate(var(--dx3), var(--dy3)); opacity: 0.7; }
+  }
+
+  /* ===== 外层环轨粒子（与光环不同轨道的第二圈） ===== */
+  .orbit-track-particle {
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 2px;
+    margin: -1px 0 0 -1px;
+    border-radius: 50%;
+    background: rgba(200,168,76,0.7);
+    animation: orbit-track-spin 12s linear infinite;
+  }
+  @keyframes orbit-track-spin {
+    0% { transform: rotate(var(--or)) translateX(var(--or)) rotate(calc(-1 * var(--or))); opacity: 0.1; }
+    25% { opacity: 0.8; box-shadow: 0 0 4px var(--gold-light); }
+    50% { opacity: 0.2; }
+    75% { opacity: 0.7; box-shadow: 0 0 6px var(--gold-light), 0 0 10px var(--bronze); }
+    100% { transform: rotate(calc(360deg + var(--or))) translateX(var(--or)) rotate(calc(-360deg - var(--or))); opacity: 0.1; }
+  }
+
+  /* ===== 太极能量场 ===== */
+  .taiji-aura {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    margin: -50px 0 0 -50px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9;
+    border: 2px solid transparent;
+    transition: all 0.8s;
+  }
+  .taiji-aura.pulse {
+    opacity: 1;
+    border-color: rgba(200,168,76,0.6);
+    box-shadow: 0 0 40px rgba(200,168,76,0.4), 0 0 80px rgba(200,168,76,0.15), 0 0 120px rgba(200,168,76,0.05);
+    animation: aura-expand 0.8s ease-out forwards, aura-pulse 2s ease-in-out 0.8s infinite;
+  }
+  @keyframes aura-expand {
+    0% { width: 72px; height: 72px; margin: -36px 0 0 -36px; opacity: 0; }
+    100% { width: 100px; height: 100px; margin: -50px 0 0 -50px; opacity: 1; }
+  }
+  @keyframes aura-pulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(200,168,76,0.4), 0 0 80px rgba(200,168,76,0.15); }
+    50% { box-shadow: 0 0 60px rgba(200,168,76,0.6), 0 0 120px rgba(200,168,76,0.25), 0 0 160px rgba(200,168,76,0.08); }
+  }
+
+  /* ===== 粒子爆发 ===== */
+  .burst-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 120;
+    animation: burst-out 1.2s ease-out forwards;
+  }
+  @keyframes burst-out {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1); opacity: 0; }
+  }
+
+  /* ===== 阵盘震动 ===== */
+  .bagua-disk.quaking {
+    animation: disk-quake 0.3s ease-out;
+  }
+  @keyframes disk-quake {
+    0%, 100% { transform: rotateY(var(--qy, 0deg)) rotateX(68deg) translateY(0); }
+    20% { transform: rotateY(var(--qy, 0deg)) rotateX(68deg) translateY(-4px); }
+    40% { transform: rotateY(var(--qy, 0deg)) rotateX(68deg) translateY(3px); }
+    60% { transform: rotateY(var(--qy, 0deg)) rotateX(68deg) translateY(-2px); }
+    80% { transform: rotateY(var(--qy, 0deg)) rotateX(68deg) translateY(1px); }
+  }
+
+  /* ===== 六爻翻转动画（变卦过渡） ===== */
+  .yao-flip-stage {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+    pointer-events: none;
+    display: none;
+  }
+  .yao-flip-stage.active { display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; }
+  .yao-flip-item {
+    width: 120px; height: 16px;
+    perspective: 400px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .yao-flip-item.show { opacity: 1; transform: translateY(0); }
+  .yao-flip-item .flip-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .yao-flip-item.flipping .flip-inner {
+    transform: rotateX(720deg);
+  }
+  .yao-flip-item .flip-front, .yao-flip-item .flip-back {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+  }
+  .yao-flip-item .flip-front {
+    background: var(--yang);
+    box-shadow: 0 0 12px rgba(245,240,232,0.4);
+  }
+  .yao-flip-item .flip-front.yin-line {
+    background: transparent;
+    border: 2px solid var(--text-dim);
+    box-shadow: none;
+    width: 50%;
+    left: 25%;
+  }
+  .yao-flip-item .flip-back {
+    background: transparent;
+    border: 2px solid var(--text-dim);
+    box-shadow: none;
+    width: 50%;
+    left: 25%;
+    transform: rotateX(180deg);
+  }
+  .yao-flip-item .flip-back.yang-line {
+    background: var(--yang);
+    box-shadow: 0 0 12px rgba(245,240,232,0.4);
+    border: none;
+    width: 100%;
+    left: 0;
+  }
+  .yao-flip-item .flip-front.changing-mark, .yao-flip-item .flip-back.changing-mark {
+    box-shadow: 0 0 18px rgba(200,168,76,0.8), 0 0 30px rgba(155,48,32,0.5);
+  }
+  /* 翻转覆盖层 */
+  .flip-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .flip-overlay.active { opacity: 1; }
+
+  /* ===== 卦象卡片入场动画 ===== */
+  .gua-card {
+    animation: card-reveal 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .gua-card:nth-child(1) { animation-delay: 0.1s; }
+  .gua-card:nth-child(2) { animation-delay: 0.25s; }
+  @keyframes card-reveal {
+    0% { opacity: 0; transform: translateY(30px) scale(0.95); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  /* ===== 解读区渐入 ===== */
+  .interpretation {
+    animation: interp-fade 0.7s ease-out both;
+    animation-delay: 0.4s;
+  }
+  @keyframes interp-fade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== 六爻排盘行入场 ===== */
+  #liuyaoPaiPan .paipan-row {
+    opacity: 0;
+    transform: translateX(-15px);
+    animation: paipan-row-in 0.4s ease-out forwards;
+  }
+  #liuyaoPaiPan .paipan-row:nth-child(1) { animation-delay: 0.3s; }
+  #liuyaoPaiPan .paipan-row:nth-child(2) { animation-delay: 0.36s; }
+  #liuyaoPaiPan .paipan-row:nth-child(3) { animation-delay: 0.42s; }
+  #liuyaoPaiPan .paipan-row:nth-child(4) { animation-delay: 0.48s; }
+  #liuyaoPaiPan .paipan-row:nth-child(5) { animation-delay: 0.54s; }
+  #liuyaoPaiPan .paipan-row:nth-child(6) { animation-delay: 0.60s; }
+  @keyframes paipan-row-in {
+    0% { opacity: 0; transform: translateX(-15px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ===== 阵盘光环脉冲 ===== */
+  .disk-ring-outer.pulse-ring {
+    animation: ring-pulse 0.6s ease-out;
+  }
+  @keyframes ring-pulse {
+    0% { box-shadow: 0 0 60px rgba(200,168,76,0.6), 0 0 100px rgba(200,168,76,0.3), 0 0 0 6px rgba(139,125,90,0.08), 0 0 0 12px rgba(139,125,90,0.04); }
+    100% { box-shadow: 0 0 30px rgba(139,125,90,0.1), inset 0 0 30px rgba(139,125,90,0.04), 0 0 0 6px rgba(139,125,90,0.08), 0 0 0 12px rgba(139,125,90,0.04); }
+  }
+
+  /* ================================================================
+     1. 旋转地球
+  ================================================================ */
+  .crystal-ball {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 140px; height: 140px;
+    margin: -220px 0 0 -70px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 80;
+    opacity: 0;
+    transition: opacity 0.8s;
+    background:
+      radial-gradient(circle at 40% 35%, rgba(65,105,225,0.2) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(34,139,34,0.1) 30%, rgba(25,25,112,0.5) 60%, rgba(5,5,20,0.9) 100%);
+    border: 2px solid rgba(100,160,220,0.3);
+    box-shadow:
+      inset 0 0 40px rgba(100,160,220,0.1),
+      0 0 30px rgba(100,180,240,0.3),
+      0 0 60px rgba(70,130,180,0.2);
+    overflow: hidden;
+    animation: none;
+  }
+  /* 地球大陆纹理（伪元素生成） */
+  .crystal-ball::before {
+    content: '';
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 140%; height: 140%;
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at 25% 30%, rgba(80,180,80,0.15) 0%, transparent 25%),
+      radial-gradient(ellipse at 55% 35%, rgba(80,160,80,0.12) 0%, transparent 20%),
+      radial-gradient(ellipse at 70% 50%, rgba(60,140,60,0.1) 0%, transparent 22%),
+      radial-gradient(ellipse at 40% 55%, rgba(100,180,100,0.1) 0%, transparent 18%),
+      radial-gradient(ellipse at 20% 60%, rgba(80,160,80,0.08) 0%, transparent 20%),
+      radial-gradient(ellipse at 65% 25%, rgba(60,150,60,0.1) 0%, transparent 15%),
+      radial-gradient(ellipse at 80% 65%, rgba(100,200,100,0.08) 0%, transparent 16%);
+    filter: blur(1px);
+  }
+  /* 地球云层 */
+  .crystal-ball::after {
+    content: '';
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 140%; height: 140%;
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.06) 0%, transparent 12%),
+      radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.05) 0%, transparent 10%),
+      radial-gradient(ellipse at 60% 55%, rgba(255,255,255,0.04) 0%, transparent 11%),
+      radial-gradient(ellipse at 35% 65%, rgba(255,255,255,0.05) 0%, transparent 10%),
+      radial-gradient(ellipse at 70% 40%, rgba(255,255,255,0.04) 0%, transparent 9%);
+    filter: blur(2px);
+    animation: earth-clouds-drift 8s linear infinite;
+  }
+  .crystal-ball.active {
+    opacity: 1;
+    animation: ball-float 4s ease-in-out infinite;
+  }
+  @keyframes ball-float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  /* 地球自转 */
+  @keyframes earth-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes earth-clouds-drift {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+  }
+  /* 地球内部陆地自转层 */
+  .earth-land-layer {
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 140%; height: 140%;
+    border-radius: 50%;
+    animation: earth-spin 20s linear infinite;
+    background:
+      radial-gradient(ellipse at 25% 30%, rgba(80,180,80,0.2) 0%, transparent 25%),
+      radial-gradient(ellipse at 55% 35%, rgba(80,160,80,0.15) 0%, transparent 20%),
+      radial-gradient(ellipse at 70% 50%, rgba(60,140,60,0.12) 0%, transparent 22%),
+      radial-gradient(ellipse at 40% 55%, rgba(100,180,100,0.13) 0%, transparent 18%),
+      radial-gradient(ellipse at 20% 60%, rgba(80,160,80,0.1) 0%, transparent 20%),
+      radial-gradient(ellipse at 65% 25%, rgba(60,150,60,0.12) 0%, transparent 15%),
+      radial-gradient(ellipse at 80% 65%, rgba(100,200,100,0.1) 0%, transparent 16%),
+      radial-gradient(ellipse at 10% 45%, rgba(60,130,60,0.08) 0%, transparent 14%),
+      radial-gradient(ellipse at 50% 70%, rgba(80,180,80,0.08) 0%, transparent 15%);
+    pointer-events: none;
+  }
+  /* 球内卦象浮现 */
+  .crystal-gua {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px var(--gold-light), 0 0 40px var(--gold);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 1s ease-out;
+    z-index: 2;
+  }
+  .crystal-gua.revealed {
+    opacity: 1;
+    transform: scale(1);
+    animation: crystal-glow 2s ease-in-out infinite;
+  }
+  @keyframes crystal-glow {
+    0%,100% { text-shadow: 0 0 20px var(--gold-light), 0 0 40px var(--gold); }
+    50% { text-shadow: 0 0 35px var(--gold-light), 0 0 60px var(--gold), 0 0 90px rgba(200,168,76,0.5); }
+  }
+
+  /* ================================================================
+     2. 全屏星空漩涡
+  ================================================================ */
+  .star-vortex-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  .star-vortex-overlay.active { opacity: 1; }
+  .vortex-star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    pointer-events: none;
+    animation: vortex-spiral 3s ease-in forwards;
+  }
+  @keyframes vortex-spiral {
+    0% {
+      transform: translate(0, 0) scale(0);
+      opacity: 0;
+    }
+    20% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.9;
+    }
+    60% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translate(var(--vx), var(--vy)) scale(0.3);
+      opacity: 0;
+    }
+  }
+
+  /* ================================================================
+     3. 六爻闪电连线
+  ================================================================ */
+  .lightning-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .lightning-overlay.active { opacity: 1; }
+  .lightning-bolt {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(200,168,76,0.4) 20%,
+      rgba(255,255,255,0.9) 50%,
+      rgba(200,168,76,0.4) 80%, transparent 100%);
+    transform-origin: left center;
+    animation: bolt-flicker 0.3s ease-out forwards;
+    filter: blur(0.5px);
+  }
+  .lightning-bolt::before {
+    content: '';
+    position: absolute;
+    inset: -3px 0;
+    background: inherit;
+    filter: blur(6px);
+    opacity: 0.5;
+  }
+  .lightning-bolt.changing-bolt {
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(200,168,76,0.6) 20%,
+      rgba(255,200,80,1) 40%, rgba(255,255,255,1) 50%,
+      rgba(255,200,80,1) 60%, rgba(200,168,76,0.6) 80%, transparent 100%);
+  }
+  @keyframes bolt-flicker {
+    0% { opacity: 0; transform: scaleX(0); }
+    30% { opacity: 1; transform: scaleX(1); }
+    60% { opacity: 0.5; }
+    80% { opacity: 0.8; transform: scaleX(0.95); }
+    100% { opacity: 0; transform: scaleX(1); }
+  }
+
+  /* ================================================================
+     4. 阵盘火焰/光晕拖尾
+  ================================================================ */
+  .fire-trail-particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 110;
+    animation: fire-fade 1.5s ease-out forwards;
+  }
+  @keyframes fire-fade {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    100% { transform: translate(calc(-50% + var(--ftx)), calc(-50% + var(--fty))) scale(0.1); opacity: 0; }
+  }
+
+  /* ================================================================
+     5. 起卦完成烟花（Canvas）
+  ================================================================ */
+  .firework-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .firework-canvas.active { opacity: 1; }
+
+  /* ================================================================
+     6. 游鱼太极
+  ================================================================ */
+  .taiji-core.fish-mode {
+    background: transparent !important;
+    border: 2px solid rgba(139,125,90,0.3);
+    animation: core-float 3s ease-in-out infinite, taiji-spin 8s linear infinite;
+    overflow: hidden;
+  }
+  .taiji-core.fish-mode .taiji-half-top,
+  .taiji-core.fish-mode .taiji-half-bottom,
+  .taiji-core.fish-mode .taiji-dot-top,
+  .taiji-core.fish-mode .taiji-dot-bottom {
+    display: none;
+  }
+  .taiji-fish {
+    position: absolute;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .fish-yang {
+    position: absolute;
+    width: 50%; height: 100%;
+    left: 0; top: 0;
+    background: var(--yang);
+    border-radius: 50% 0 0 50%;
+    animation: fish-yang-swim 3s ease-in-out infinite;
+  }
+  .fish-yang::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--yin);
+    border-radius: 50%;
+    top: 50%; right: 14px;
+    margin-top: -5px;
+    animation: fish-dot-breathe 2s ease-in-out infinite;
+  }
+  .fish-yin {
+    position: absolute;
+    width: 50%; height: 100%;
+    right: 0; top: 0;
+    background: var(--yin);
+    border-radius: 0 50% 50% 0;
+    animation: fish-yin-swim 3s ease-in-out infinite;
+  }
+  .fish-yin::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--yang);
+    border-radius: 50%;
+    top: 50%; left: 14px;
+    margin-top: -5px;
+    animation: fish-dot-breathe 2s ease-in-out infinite;
+  }
+  @keyframes fish-yang-swim {
+    0%,100% { transform: rotate(0deg); }
+    25% { transform: rotate(8deg); }
+    75% { transform: rotate(-8deg); }
+  }
+  @keyframes fish-yin-swim {
+    0%,100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+  @keyframes fish-dot-breathe {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  /* 阵盘拖尾容器 */
+  .disk-trail-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .disk-trail-container.active { opacity: 1; }
+
+  /* ================================================================
+     7. 天干地支流水轮盘
+  ================================================================ */
+  .ganzhi-flow-ring {
+    position: absolute;
+    inset: -60px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  .ganzhi-flow-ring.active { opacity: 1; }
+  .gz-flow-char {
+    position: absolute;
+    font-size: 12px;
+    color: var(--bronze);
+    font-family: "Noto Serif SC", "KaiTi", serif;
+    text-shadow: 0 0 6px rgba(139,125,90,0.4);
+    transition: all 0.4s;
+    letter-spacing: 1px;
+    animation: gz-flow-glow 3s ease-in-out infinite;
+  }
+  .gz-flow-char.highlight {
+    color: var(--gold-light);
+    text-shadow: 0 0 12px var(--gold-light), 0 0 24px var(--gold);
+    font-size: 16px;
+    font-weight: bold;
+  }
+  @keyframes gz-flow-glow {
+    0%,100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* ================================================================
+     8. 六爻揭示能量柱
+  ================================================================ */
+  .energy-beam {
+    position: fixed;
+    pointer-events: none;
+    z-index: 140;
+    background: linear-gradient(0deg,
+      transparent 0%, rgba(200,168,76,0.1) 20%,
+      rgba(232,211,140,0.4) 50%,
+      rgba(200,168,76,0.1) 80%, transparent 100%);
+    border-radius: 2px;
+    filter: blur(2px);
+    animation: beam-burst 1s ease-out forwards;
+    transform-origin: bottom center;
+  }
+  .energy-beam::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 30px; height: 30px;
+    background: radial-gradient(circle, rgba(232,211,140,0.8), transparent 70%);
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: beam-head-glow 1s ease-out forwards;
+  }
+  @keyframes beam-burst {
+    0% { opacity: 0; transform: scaleY(0); }
+    30% { opacity: 1; transform: scaleY(1); }
+    100% { opacity: 0; transform: scaleY(1.2); }
+  }
+  @keyframes beam-head-glow {
+    0% { opacity: 0; transform: translateX(-50%) scale(0); }
+    40% { opacity: 1; transform: translateX(-50%) scale(1.5); }
+    100% { opacity: 0; transform: translateX(-50%) scale(2); }
+  }
+
+  /* ================================================================
+     9. 天降符纸
+  ================================================================ */
+  .talisman {
+    position: fixed;
+    pointer-events: none;
+    z-index: 260;
+    font-family: "Noto Serif SC", "KaiTi", serif;
+    font-size: 16px;
+    color: rgba(200,168,76,0.7);
+    background: linear-gradient(135deg, rgba(30,25,20,0.7), rgba(20,15,10,0.6));
+    border: 1px solid rgba(139,125,90,0.2);
+    border-radius: 4px;
+    padding: 6px 12px;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(200,168,76,0.3);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    animation: talisman-fall var(--fall-dur, 5s) ease-in forwards;
+    opacity: 0;
+  }
+  @keyframes talisman-fall {
+    0% {
+      transform: translateY(-60px) rotate(0deg) scale(0.8);
+      opacity: 0;
+    }
+    15% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(105vh) rotate(var(--rot, 360deg)) scale(0.4);
+      opacity: 0;
+    }
+  }
+
+  /* ================================================================
+     10. 日月同辉背景光晕
+  ================================================================ */
+  .sun-moon-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+  .sun-moon-glow.active { opacity: 0.4; }
+  .sun-glow-orb {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    top: 20%; right: 8%;
+    background: radial-gradient(circle, rgba(255,140,60,0.3) 0%, rgba(200,80,30,0.1) 40%, transparent 70%);
+    filter: blur(20px);
+    animation: sun-pulse 6s ease-in-out infinite;
+  }
+  .moon-glow-orb {
+    position: absolute;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    top: 15%; left: 8%;
+    background: radial-gradient(circle, rgba(140,180,220,0.3) 0%, rgba(80,120,180,0.1) 40%, transparent 70%);
+    filter: blur(20px);
+    animation: moon-pulse 7s ease-in-out infinite;
+  }
+  @keyframes sun-pulse {
+    0%,100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; }
+  }
+  @keyframes moon-pulse {
+    0%,100% { transform: scale(1.2); opacity: 0.7; }
+    50% { transform: scale(0.9); opacity: 1; }
+  }
+
+  /* ================================================================
+     11. 爻变墨韵晕染
+  ================================================================ */
+  .ink-blot {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    background: radial-gradient(circle,
+      rgba(155,48,32,0.3) 0%,    /* 朱砂红芯 */
+      rgba(139,58,26,0.15) 20%,
+      rgba(50,20,10,0.08) 40%,
+      transparent 70%);
+    filter: blur(8px);
+    animation: ink-spread 2s ease-out forwards;
+  }
+  @keyframes ink-spread {
+    0% { transform: scale(0.1); opacity: 0; }
+    30% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* ================================================================
+     12. 六十四卦轮盘闪现
+  ================================================================ */
+  .gua64-wheel {
+    position: absolute;
+    inset: -80px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 55;
+    opacity: 0;
+    transition: opacity 0.3s;
+    animation: none;
+  }
+  .gua64-wheel.spinning {
+    opacity: 1;
+    animation: wheel-spin-fast 2s ease-out forwards;
+  }
+  .gua64-wheel .wheel-char {
+    position: absolute;
+    font-size: 9px;
+    color: var(--text-dim);
+    font-family: "Noto Serif SC", "KaiTi", serif;
+    opacity: 0.5;
+    text-shadow: 0 0 4px rgba(139,125,90,0.3);
+  }
+  .gua64-wheel .wheel-char.final-highlight {
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: bold;
+    opacity: 1;
+    text-shadow: 0 0 8px var(--gold-light), 0 0 16px var(--gold);
+    animation: final-gua-blink 0.4s ease-in-out 3;
+  }
+  @keyframes wheel-spin-fast {
+    0% { transform: rotate(0deg); opacity: 1; }
+    70% { transform: rotate(720deg); opacity: 1; }
+    100% { transform: rotate(720deg); opacity: 0; }
+  }
+  @keyframes final-gua-blink {
+    0%,100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* ================================================================
+     13. 金文铭刻浮现
+  ================================================================ */
+  .jinwen-inscription {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+    pointer-events: none;
+    font-family: "Noto Serif SC", "KaiTi", serif;
+    font-size: 0;
+    color: transparent;
+    background: linear-gradient(180deg,
+      rgba(200,168,76,0) 0%,
+      rgba(200,168,76,1) 20%,
+      rgba(232,211,140,1) 50%,
+      rgba(200,168,76,1) 80%,
+      rgba(200,168,76,0) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    letter-spacing: 12px;
+    writing-mode: vertical-rl;
+    animation: jinwen-appear 3s ease-out forwards;
+    filter: drop-shadow(0 0 20px rgba(200,168,76,0.6)) drop-shadow(0 0 40px rgba(200,168,76,0.3));
+  }
+  @keyframes jinwen-appear {
+    0% { font-size: 0px; opacity: 0; transform: translate(-50%, -50%) scale(0.3); filter: blur(15px) drop-shadow(0 0 20px rgba(200,168,76,0.6)); }
+    15% { font-size: 0px; opacity: 1; transform: translate(-50%, -50%) scale(0.5); filter: blur(8px) drop-shadow(0 0 30px rgba(200,168,76,0.8)); }
+    40% { font-size: 80px; opacity: 1; transform: translate(-50%, -50%) scale(1.1); filter: blur(0px) drop-shadow(0 0 40px rgba(200,168,76,0.8)); }
+    60% { font-size: 72px; opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px) drop-shadow(0 0 30px rgba(200,168,76,0.6)); }
+    100% { font-size: 64px; opacity: 0; transform: translate(-50%, -55%) scale(1.05); filter: blur(4px) drop-shadow(0 0 60px rgba(200,168,76,0.2)); }
+  }
+
+  /* ================================================================
+     14. 阴阳鱼游动
+  ================================================================ */
+  .yin-yang-fish-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 1.5s;
+  }
+  .yin-yang-fish-container.active { opacity: 1; }
+  .yin-fish, .yang-fish {
+    position: absolute;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    animation: fish-swim 8s ease-in-out infinite;
+    filter: blur(3px);
+  }
+  .yang-fish {
+    background: radial-gradient(circle at 40% 40%, rgba(240,234,216,0.5) 0%, rgba(200,168,76,0.2) 40%, transparent 70%);
+    box-shadow: 0 0 30px rgba(200,168,76,0.3), 0 0 60px rgba(200,168,76,0.1);
+    animation-delay: 0s;
+    top: 35%; left: 40%;
+  }
+  .yin-fish {
+    background: radial-gradient(circle at 40% 40%, rgba(26,26,34,0.5) 0%, rgba(10,10,16,0.2) 40%, transparent 70%);
+    box-shadow: 0 0 30px rgba(26,26,34,0.4), 0 0 60px rgba(26,26,34,0.15);
+    animation-delay: -4s;
+    top: 55%; left: 55%;
+  }
+  @keyframes fish-swim {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    15% { transform: translate(80px, -60px) rotate(120deg) scale(1.3); }
+    30% { transform: translate(150px, 20px) rotate(240deg) scale(1.1); }
+    50% { transform: translate(60px, 100px) rotate(360deg) scale(1.4); }
+    65% { transform: translate(-80px, 60px) rotate(480deg) scale(1); }
+    80% { transform: translate(-120px, -40px) rotate(600deg) scale(1.2); }
+    100% { transform: translate(0, 0) rotate(720deg) scale(1); }
+  }
+
+  /* ================================================================
+     15. 龟甲裂纹光效
+  ================================================================ */
+  .tortoise-crack-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+  }
+  .tortoise-crack-overlay.active { opacity: 1; }
+  .tortoise-crack-overlay svg {
+    width: 100%; height: 100%;
+  }
+  .crack-line {
+    stroke: rgba(200,168,76,0);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px rgba(200,168,76,0.6));
+    animation: crack-glow 0.8s ease-out forwards;
+  }
+  @keyframes crack-glow {
+    0% { stroke: rgba(255,200,80,0); stroke-width: 0; }
+    20% { stroke: rgba(255,200,80,0.9); stroke-width: 3; }
+    60% { stroke: rgba(255,180,50,0.7); stroke-width: 2; }
+    100% { stroke: rgba(200,140,40,0); stroke-width: 1; }
+  }
+
+  /* ================================================================
+     16. 星河倒悬瀑布
+  ================================================================ */
+  .starfall-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .starfall-container.active { opacity: 1; }
+  .starfall-particle {
+    position: absolute;
+    top: -10px;
+    border-radius: 50%;
+    background: white;
+    animation: starfall-drop linear forwards;
+    box-shadow: 0 0 6px rgba(232,211,140,0.8), 0 0 15px rgba(200,168,76,0.4);
+  }
+  @keyframes starfall-drop {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ================================================================
+     17. 五行光环脉冲
+  ================================================================ */
+  .wuxing-rings {
+    position: absolute;
+    inset: -60px;
+    pointer-events: none;
+    z-index: 30;
+    opacity: 0;
+  }
+  .wuxing-rings.active { opacity: 1; }
+  .wuxing-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    animation: wuxing-expand 2.5s ease-out forwards;
+  }
+  @keyframes wuxing-expand {
+    0% { width: 0; height: 0; margin: 0; border-width: 4px; opacity: 1; }
+    70% { opacity: 0.5; }
+    100% { width: 420px; height: 420px; margin: -210px 0 0 -210px; border-width: 1px; opacity: 0; }
+  }
+
+  /* ================================================================
+     18. 卦辞竹简展开
+  ================================================================ */
+  .bamboo-scroll-container {
+    position: fixed;
+    top: 10%; bottom: 10%;
+    z-index: 250;
+    pointer-events: none;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .bamboo-scroll-container.active { opacity: 1; }
+  .bamboo-scroll-container.left-scroll { left: 0; padding-left: 2%; }
+  .bamboo-scroll-container.right-scroll { right: 0; padding-right: 2%; }
+  .bamboo-slip {
+    width: 28px;
+    background: linear-gradient(90deg,
+      rgba(60,50,30,0.7) 0%,
+      rgba(80,68,40,0.85) 15%,
+      rgba(100,85,50,0.9) 50%,
+      rgba(80,68,40,0.85) 85%,
+      rgba(60,50,30,0.7) 100%);
+    border: 1px solid rgba(139,125,90,0.2);
+    border-radius: 2px;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "KaiTi", "STKaiti", "Noto Serif SC", serif;
+    color: rgba(180,150,100,0);
+    font-size: 16px;
+    letter-spacing: 4px;
+    animation: bamboo-reveal 0.8s ease-out forwards;
+    box-shadow: 1px 0 3px rgba(0,0,0,0.3);
+  }
+  .bamboo-slip::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 2px;
+    background: rgba(139,125,90,0.15);
+  }
+  .bamboo-slip::before { top: 15%; }
+  @keyframes bamboo-reveal {
+    0% { transform: translateX(var(--slide-dir, -100px)) scaleY(0.7); opacity: 0; color: rgba(180,150,100,0); }
+    40% { transform: translateX(0) scaleY(1.05); opacity: 1; color: rgba(180,150,100,0); }
+    60% { transform: translateX(0) scaleY(1); opacity: 1; color: rgba(200,168,76,0.9); text-shadow: 0 0 10px rgba(200,168,76,0.5); }
+    100% { transform: translateX(0) scaleY(1); opacity: 1; color: rgba(200,168,76,0.8); text-shadow: 0 0 6px rgba(200,168,76,0.3); }
+  }
+
+  /* ================================================================
+     19. 八卦镜光柱冲天
+  ================================================================ */
+  .light-pillar {
+    position: fixed;
+    top: 0; left: 50%;
+    transform: translateX(-50%) scaleY(0);
+    width: 200px;
+    height: 100vh;
+    background: linear-gradient(180deg,
+      rgba(200,168,76,0) 0%,
+      rgba(200,168,76,0.15) 30%,
+      rgba(232,211,140,0.25) 50%,
+      rgba(200,168,76,0.1) 70%,
+      rgba(200,168,76,0) 100%);
+    pointer-events: none;
+    z-index: 50;
+    transform-origin: top center;
+    animation: pillar-shoot 2s ease-out forwards;
+    filter: blur(8px);
+  }
+  .light-pillar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(180deg,
+      rgba(255,240,200,0.6) 0%,
+      rgba(232,211,140,0.3) 30%,
+      rgba(200,168,76,0.1) 60%,
+      transparent 100%);
+    filter: blur(4px);
+  }
+  @keyframes pillar-shoot {
+    0% { transform: translateX(-50%) scaleY(0); opacity: 0; }
+    30% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+    70% { transform: translateX(-50%) scaleY(1); opacity: 0.8; }
+    100% { transform: translateX(-50%) scaleY(1); opacity: 0; }
+  }
+  .pillar-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 51;
+  }
+  .pillar-particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    box-shadow: 0 0 8px var(--gold-light);
+    animation: pillar-rise 2.5s ease-out forwards;
+  }
+  @keyframes pillar-rise {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ================================================================
+     20. 时空涟漪波纹
+  ================================================================ */
+  .ripple-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 13;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .ripple-container.active { opacity: 1; }
+  .ripple-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(139,125,90,0.4);
+    animation: ripple-expand 4s ease-out infinite;
+    background: radial-gradient(circle,
+      rgba(139,125,90,0.05) 0%,
+      rgba(139,125,90,0.02) 40%,
+      transparent 60%);
+  }
+  @keyframes ripple-expand {
+    0% { width: 20px; height: 20px; margin: -10px 0 0 -10px; opacity: 0.6; }
+    100% { width: 600px; height: 600px; margin: -300px 0 0 -300px; opacity: 0; }
+  }
+  .ripple-char {
+    position: absolute;
+    font-family: "Noto Serif SC", "KaiTi", serif;
+    color: rgba(200,168,76,0.4);
+    font-size: 14px;
+    animation: ripple-char-float 5s ease-out infinite;
+    text-shadow: 0 0 6px rgba(200,168,76,0.3);
+    pointer-events: none;
+  }
+  @keyframes ripple-char-float {
+    0% { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    20% { transform: translate(var(--drx), var(--dry)) scale(1); opacity: 0.8; }
+    80% { transform: translate(calc(var(--drx)*3), calc(var(--dry)*3)) scale(1.5); opacity: 0.3; }
+    100% { transform: translate(calc(var(--drx)*5), calc(var(--dry)*5)) scale(2); opacity: 0; }
+  }
 </style>
 </head>
 <body>
@@ -1694,17 +2765,29 @@
     <div class="divination-steps" id="divinationSteps" style="display:none;"></div>
 
     <div class="scene3d">
+      <!-- 旋转地球（阵盘上方悬浮） -->
+      <div class="crystal-ball" id="crystalBall">
+        <div class="earth-land-layer"></div>
+        <div class="crystal-gua" id="crystalGua"></div>
+      </div>
+
       <div class="bagua-spinner-wrap" id="baguaSpinnerWrap">
         <!-- 阵盘投影 -->
         <div class="disk-shadow"></div>
+
+        <!-- 粒子光环（悬浮在阵盘上方） -->
+        <div class="particle-ring" id="particleRing"></div>
 
         <!-- 阵盘主体 — 所有元素在此内部统一旋转 -->
         <div class="bagua-disk" id="baguaDisk">
           <!-- 星宿粒子（最外层） -->
           <div class="star-particles" id="starParticles"></div>
 
+          <!-- 阵盘表面飘浮粒子 -->
+          <div class="disk-drift-particles" id="diskDriftParticles"></div>
+
           <!-- 三层环 -->
-          <div class="disk-ring-outer"></div>
+          <div class="disk-ring-outer" id="diskRingOuter"></div>
           <div class="disk-ring-mid"></div>
           <div class="disk-ring-inner"></div>
 
@@ -1720,13 +2803,20 @@
           <!-- 八卦卡片容器 -->
           <div id="guaCardsDisk"></div>
 
-          <!-- 太极核心 -->
-          <div class="taiji-core">
+          <!-- 太极核心（游鱼模式） -->
+          <div class="taiji-core fish-mode" id="taijiCore">
             <div class="taiji-half-top"></div>
             <div class="taiji-half-bottom"></div>
             <div class="taiji-dot-top"></div>
             <div class="taiji-dot-bottom"></div>
+            <div class="taiji-fish">
+              <div class="fish-yang"></div>
+              <div class="fish-yin"></div>
+            </div>
           </div>
+
+          <!-- 太极能量场 -->
+          <div class="taiji-aura" id="taijiAura"></div>
         </div>
 
         <!-- 爻弹出（在阵盘上方，不随盘旋转） -->
@@ -1736,6 +2826,67 @@
         </div>
       </div>
     </div>
+
+        <!-- 六爻翻转动画覆盖层 -->
+    <div class="flip-overlay" id="flipOverlay"></div>
+    <div class="yao-flip-stage" id="yaoFlipStage"></div>
+
+    <!-- 全屏星空漩涡覆盖层 -->
+    <div class="star-vortex-overlay" id="starVortexOverlay"></div>
+
+    <!-- 六爻闪电连线覆盖层 -->
+    <div class="lightning-overlay" id="lightningOverlay"></div>
+
+    <!-- 烟花 Canvas -->
+    <canvas class="firework-canvas" id="fireworkCanvas"></canvas>
+
+    <!-- 阵盘拖尾容器 -->
+    <div class="disk-trail-container" id="diskTrailContainer"></div>
+
+    <!-- 日月同辉背景光晕 -->
+    <div class="sun-moon-glow" id="sunMoonGlow">
+      <div class="sun-glow-orb"></div>
+      <div class="moon-glow-orb"></div>
+    </div>
+
+    <!-- 天干地支流水轮盘 -->
+    <div class="ganzhi-flow-ring" id="ganzhiFlowRing"></div>
+
+    <!-- 六十四卦轮盘 -->
+    <div class="gua64-wheel" id="gua64Wheel"></div>
+
+    <!-- 天降符纸容器 -->
+    <div class="talisman-container" id="talismanContainer" style="position:fixed;inset:0;pointer-events:none;z-index:260;"></div>
+
+    <!-- 金文铭刻浮现 -->
+    <div class="jinwen-inscription" id="jinwenInscription"></div>
+
+    <!-- 阴阳鱼游动 -->
+    <div class="yin-yang-fish-container" id="yinYangFish">
+      <div class="yang-fish"></div>
+      <div class="yin-fish"></div>
+    </div>
+
+    <!-- 龟甲裂纹 -->
+    <div class="tortoise-crack-overlay" id="tortoiseCrack">
+      <svg id="crackSvg" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg>
+    </div>
+
+    <!-- 星河倒悬瀑布 -->
+    <div class="starfall-container" id="starfallContainer"></div>
+
+    <!-- 五行光环脉冲 -->
+    <div class="wuxing-rings" id="wuxingRings"></div>
+
+    <!-- 卦辞竹简 -->
+    <div class="bamboo-scroll-container left-scroll" id="bambooLeft"></div>
+    <div class="bamboo-scroll-container right-scroll" id="bambooRight"></div>
+
+    <!-- 光柱粒子容器 -->
+    <div class="pillar-particles" id="pillarParticles"></div>
+
+    <!-- 时空涟漪 -->
+    <div class="ripple-container" id="rippleContainer"></div>
 
     <div class="lines-progress" id="linesProgress"></div>
   </div>
@@ -2186,6 +3337,8 @@ function initBaguaDisk() {
   initGanzhiLabels();
   initGuaCards();
   initStarParticles();
+  initParticleRing();
+  initDiskDriftParticles();
 }
 
 // 刻度线（内外环之间，每隔15度一条，45度主刻度）
@@ -2323,6 +3476,879 @@ function initStarParticles() {
     particle.style.animationDuration = (2.5 + Math.random() * 2) + 's';
     container.appendChild(particle);
   }
+}
+
+// ===== 粒子光环初始化（悬浮在阵盘上方的旋转粒子环） =====
+function initParticleRing() {
+  const ring = document.getElementById('particleRing');
+  if (!ring) return;
+  ring.innerHTML = '';
+  for (let i = 0; i < 36; i++) {
+    const p = document.createElement('div');
+    p.className = 'ring-particle';
+    const angle = (i / 36) * 360;
+    p.style.setProperty('--ra', angle + 'deg');
+    p.style.animationDelay = (i * 0.22) + 's';
+    p.style.animationDuration = (6 + Math.random() * 4) + 's';
+    ring.appendChild(p);
+  }
+
+  // 第二圈轨粒子（内圈，半径约 140px）
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div');
+    p.className = 'orbit-track-particle';
+    const angle = (i / 24) * 360 + (Math.random() * 15);
+    p.style.setProperty('--or', angle + 'deg');
+    p.style.animationDelay = (i * 0.3 + Math.random() * 2) + 's';
+    p.style.animationDuration = (8 + Math.random() * 8) + 's';
+    ring.appendChild(p);
+  }
+}
+
+// ===== 阵盘表面飘浮粒子 =====
+function initDiskDriftParticles() {
+  const container = document.getElementById('diskDriftParticles');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'drift-particle';
+    // 随机位置在阵盘内（半径约 140px 内）
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 20 + Math.random() * 130;
+    const x = 175 + Math.cos(angle) * dist;
+    const y = 175 + Math.sin(angle) * dist;
+    const size = 1 + Math.random() * 3;
+    // 随机飘动偏移量
+    const dx1 = (Math.random() - 0.5) * 20;
+    const dy1 = (Math.random() - 0.5) * 20;
+    const dx2 = (Math.random() - 0.5) * 30;
+    const dy2 = (Math.random() - 0.5) * 30;
+    const dx3 = (Math.random() - 0.5) * 25;
+    const dy3 = (Math.random() - 0.5) * 25;
+
+    p.style.cssText = `
+      left: ${x}px; top: ${y}px;
+      width: ${size}px; height: ${size}px;
+      margin: ${-size/2}px 0 0 ${-size/2}px;
+      --dx1: ${dx1}px; --dy1: ${dy1}px;
+      --dx2: ${dx2}px; --dy2: ${dy2}px;
+      --dx3: ${dx3}px; --dy3: ${dy3}px;
+      animation-delay: ${Math.random() * 3}s;
+      animation-duration: ${2.5 + Math.random() * 4}s;
+      background: ${Math.random() > 0.7 ? 'rgba(200,168,76,0.8)' : 'rgba(168,152,104,0.6)'};
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ================================================================
+// 1. 卦象水晶球
+// ================================================================
+function activateCrystalBall() {
+  const ball = document.getElementById('crystalBall');
+  if (ball) ball.classList.add('active');
+}
+function revealCrystalGua(guaSymbol) {
+  const gua = document.getElementById('crystalGua');
+  if (!gua) return;
+  gua.textContent = guaSymbol;
+  gua.classList.add('revealed');
+}
+function deactivateCrystalBall() {
+  const ball = document.getElementById('crystalBall');
+  const gua = document.getElementById('crystalGua');
+  if (ball) ball.classList.remove('active');
+  if (gua) { gua.classList.remove('revealed'); gua.textContent = ''; }
+}
+
+// ================================================================
+// 2. 全屏星空漩涡
+// ================================================================
+function spawnStarVortex() {
+  const overlay = document.getElementById('starVortexOverlay');
+  if (!overlay) return;
+  overlay.innerHTML = '';
+  overlay.classList.add('active');
+
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'vortex-star';
+    const angle = Math.random() * Math.PI * 2;
+    const startDist = 50 + Math.random() * 400;
+    const endDist = Math.random() * 600 + 200;
+    const sx = cx + Math.cos(angle) * startDist;
+    const sy = cy + Math.sin(angle) * startDist;
+    const vx = (cx - sx) + (Math.random() - 0.5) * 100;
+    const vy = (cy - sy) + (Math.random() - 0.5) * 100;
+    const size = 1 + Math.random() * 2.5;
+
+    star.style.cssText = `
+      left: ${sx}px; top: ${sy}px;
+      width: ${size}px; height: ${size}px;
+      --vx: ${vx}px; --vy: ${vy}px;
+      animation-delay: ${Math.random() * 0.5}s;
+      animation-duration: ${2 + Math.random() * 2}s;
+      box-shadow: 0 0 ${3+Math.random()*6}px rgba(200,168,76,${0.5+Math.random()*0.5});
+    `;
+    overlay.appendChild(star);
+  }
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    setTimeout(() => { overlay.innerHTML = ''; }, 600);
+  }, 3200);
+}
+
+// ================================================================
+// 3. 六爻闪电连线
+// ================================================================
+function spawnLightningBetween(yaoElements) {
+  const overlay = document.getElementById('lightningOverlay');
+  if (!overlay || yaoElements.length < 2) return;
+  overlay.innerHTML = '';
+  overlay.classList.add('active');
+
+  for (let i = 0; i < yaoElements.length - 1; i++) {
+    const a = yaoElements[i];
+    const b = yaoElements[i + 1];
+    if (!a || !b) continue;
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    const x1 = rectA.left + rectA.width / 2;
+    const y1 = rectA.top + rectA.height / 2;
+    const x2 = rectB.left + rectB.width / 2;
+    const y2 = rectB.top + rectB.height / 2;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const isChanging = a.classList.contains('changing-bolt-line') || b.classList.contains('changing-bolt-line');
+
+    const bolt = document.createElement('div');
+    bolt.className = 'lightning-bolt' + (isChanging ? ' changing-bolt' : '');
+    bolt.style.cssText = `
+      left: ${x1}px; top: ${y1}px;
+      width: ${dist}px;
+      transform: rotate(${angle}deg);
+      animation-delay: ${i * 0.06}s;
+    `;
+    overlay.appendChild(bolt);
+  }
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    setTimeout(() => { overlay.innerHTML = ''; }, 300);
+  }, 600);
+}
+
+// ================================================================
+// 4. 阵盘火焰/光晕拖尾
+// ================================================================
+let trailInterval = null;
+function startDiskTrail() {
+  const container = document.getElementById('diskTrailContainer');
+  if (!container) return;
+  container.classList.add('active');
+
+  trailInterval = setInterval(() => {
+    const wrap = document.getElementById('baguaSpinnerWrap');
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const diskRadius = 175;
+
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('div');
+      p.className = 'fire-trail-particle';
+      const angle = Math.random() * Math.PI * 2;
+      const r = diskRadius - 10 + Math.random() * 20;
+      const px = cx + Math.cos(angle) * r;
+      const py = cy + Math.sin(angle) * r;
+      const tx = (Math.random() - 0.5) * 60;
+      const ty = (Math.random() - 0.5) * 60;
+      const colors = ['rgba(200,168,76,0.7)', 'rgba(232,211,140,0.5)', 'rgba(139,90,26,0.6)', 'rgba(200,168,76,0.4)'];
+      p.style.cssText = `
+        left: ${px}px; top: ${py}px;
+        width: ${2+Math.random()*4}px; height: ${2+Math.random()*4}px;
+        background: ${colors[Math.floor(Math.random()*colors.length)]};
+        box-shadow: 0 0 ${4+Math.random()*8}px ${colors[0]};
+        --ftx: ${tx}px; --fty: ${ty}px;
+        animation-duration: ${1+Math.random()}s;
+      `;
+      container.appendChild(p);
+      setTimeout(() => { if (p.parentNode) p.remove(); }, 1600);
+    }
+  }, 80);
+}
+function stopDiskTrail() {
+  if (trailInterval) { clearInterval(trailInterval); trailInterval = null; }
+  const container = document.getElementById('diskTrailContainer');
+  if (container) container.classList.remove('active');
+}
+
+// ================================================================
+// 7. 天干地支流水轮盘
+// ================================================================
+let ganzhiFlowInterval = null;
+const TIANGAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const DIZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+function initGanzhiFlowRing() {
+  const ring = document.getElementById('ganzhiFlowRing');
+  if (!ring) return;
+  ring.innerHTML = '';
+  const cx = ring.offsetWidth / 2;
+  const cy = ring.offsetHeight / 2;
+  const chars = [...TIANGAN, ...DIZHI];
+  const total = chars.length;
+  const radius = Math.min(cx, cy) * 0.82;
+
+  for (let i = 0; i < total; i++) {
+    const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius - 15;
+    const y = cy + Math.sin(angle) * radius - 8;
+    const char = document.createElement('span');
+    char.className = 'gz-flow-char';
+    char.textContent = chars[i];
+    char.style.cssText = `left:${x}px;top:${y}px;animation-delay:${i * 0.15}s;`;
+    char.dataset.index = i;
+    ring.appendChild(char);
+  }
+}
+
+function startGanzhiFlow() {
+  const ring = document.getElementById('ganzhiFlowRing');
+  if (!ring) return;
+  ring.classList.add('active');
+  const chars = ring.querySelectorAll('.gz-flow-char');
+  let idx = 0;
+  if (ganzhiFlowInterval) clearInterval(ganzhiFlowInterval);
+  ganzhiFlowInterval = setInterval(() => {
+    chars.forEach(c => c.classList.remove('highlight'));
+    chars[idx % chars.length].classList.add('highlight');
+    idx++;
+  }, 300);
+}
+
+function stopGanzhiFlow() {
+  if (ganzhiFlowInterval) { clearInterval(ganzhiFlowInterval); ganzhiFlowInterval = null; }
+  const ring = document.getElementById('ganzhiFlowRing');
+  if (ring) {
+    ring.classList.remove('active');
+    ring.querySelectorAll('.gz-flow-char').forEach(c => c.classList.remove('highlight'));
+  }
+}
+
+// ================================================================
+// 8. 六爻揭示能量柱
+// ================================================================
+function spawnEnergyBeam(targetEl) {
+  const rect = targetEl.getBoundingClientRect();
+  const diskRect = document.getElementById('baguaDisk').getBoundingClientRect();
+  if (!diskRect) return;
+
+  const beam = document.createElement('div');
+  beam.className = 'energy-beam';
+  // 从阵盘中心射向爻行
+  const startX = diskRect.left + diskRect.width / 2;
+  const startY = diskRect.top + diskRect.height / 2;
+  const endX = rect.left + rect.width / 2;
+  const endY = rect.top + rect.height / 2;
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+
+  beam.style.cssText = `
+    left: ${startX - 2}px; top: ${startY}px;
+    width: 4px; height: ${dist}px;
+    transform-origin: top center;
+    transform: rotate(${angle}deg) scaleY(0);
+  `;
+  document.body.appendChild(beam);
+
+  requestAnimationFrame(() => {
+    beam.style.transform = `rotate(${angle}deg) scaleY(1)`;
+  });
+
+  setTimeout(() => {
+    beam.remove();
+  }, 1000);
+}
+
+// ================================================================
+// 9. 天降符纸
+// ================================================================
+const TALISMAN_TEXTS = [
+  '元亨利贞', '自强不息', '厚德载物', '潜龙勿用',
+  '飞龙在天', '履霜坚冰', '含章可贞', '龙战于野',
+  '天地交泰', '否极泰来', '谦谦君子', '卑以自牧',
+  '观天之神道', '四时不忒', '刚柔交错', '天文也',
+  '文明以止', '人文也', '与时偕行', '保合太和'
+];
+
+function launchTalismans(count = 15) {
+  const container = document.getElementById('talismanContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const talisman = document.createElement('div');
+    talisman.className = 'talisman';
+    talisman.textContent = TALISMAN_TEXTS[Math.floor(Math.random() * TALISMAN_TEXTS.length)];
+    const left = 5 + Math.random() * 85;
+    const rot = 200 + Math.random() * 500;
+    const dur = 4 + Math.random() * 4;
+    const delay = Math.random() * 1.5;
+    const size = 12 + Math.random() * 8;
+
+    talisman.style.cssText = `
+      left: ${left}%; top: -30px;
+      --rot: ${rot}deg;
+      --fall-dur: ${dur}s;
+      animation-delay: ${delay}s;
+      font-size: ${size}px;
+    `;
+    container.appendChild(talisman);
+  }
+
+  // 清理
+  setTimeout(() => {
+    container.innerHTML = '';
+  }, 8000);
+}
+
+// ================================================================
+// 10. 日月同辉背景光晕
+// ================================================================
+function activateSunMoon() {
+  const glow = document.getElementById('sunMoonGlow');
+  if (glow) glow.classList.add('active');
+}
+function deactivateSunMoon() {
+  const glow = document.getElementById('sunMoonGlow');
+  if (glow) glow.classList.remove('active');
+}
+
+// ================================================================
+// 11. 爻变墨韵晕染
+// ================================================================
+function spawnInkBlot(targetEl) {
+  const rect = targetEl.getBoundingClientRect();
+  const blot = document.createElement('div');
+  blot.className = 'ink-blot';
+  const size = 60 + Math.random() * 40;
+  blot.style.cssText = `
+    left: ${rect.left + rect.width / 2 - size / 2}px;
+    top: ${rect.top + rect.height / 2 - size / 2}px;
+    width: ${size}px;
+    height: ${size}px;
+  `;
+  document.body.appendChild(blot);
+  setTimeout(() => blot.remove(), 2200);
+}
+
+// ================================================================
+// 12. 六十四卦轮盘闪现
+// ================================================================
+function initGua64Wheel() {
+  const wheel = document.getElementById('gua64Wheel');
+  if (!wheel) return;
+  wheel.innerHTML = '';
+  const cx = wheel.offsetWidth / 2;
+  const cy = wheel.offsetHeight / 2;
+  const radius = Math.min(cx, cy) * 0.78;
+
+  const guaKeys = Object.keys(GUA64);
+  const total = guaKeys.length;
+
+  for (let i = 0; i < total; i++) {
+    const angle = (i / total) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius - 14;
+    const y = cy + Math.sin(angle) * radius - 6;
+    const char = document.createElement('span');
+    char.className = 'wheel-char';
+    char.textContent = GUA64[guaKeys[i]].name;
+    char.style.cssText = `left:${x}px;top:${y}px;`;
+    char.dataset.guaKey = guaKeys[i];
+    wheel.appendChild(char);
+  }
+}
+
+function spinGua64Wheel(benGuaKey, bianGuaKey) {
+  const wheel = document.getElementById('gua64Wheel');
+  if (!wheel) return;
+  wheel.classList.remove('spinning');
+  wheel.querySelectorAll('.wheel-char').forEach(c => c.classList.remove('final-highlight'));
+
+  // 触发回流后重新添加动画
+  void wheel.offsetWidth;
+  wheel.classList.add('spinning');
+
+  // 1.7秒后定位到本卦和变卦高亮
+  setTimeout(() => {
+    wheel.querySelectorAll('.wheel-char').forEach(c => {
+      if (c.dataset.guaKey === benGuaKey || c.dataset.guaKey === bianGuaKey) {
+        c.classList.add('final-highlight');
+      }
+    });
+  }, 1700);
+
+  // 3.5秒后完全清除
+  setTimeout(() => {
+    wheel.classList.remove('spinning');
+    wheel.querySelectorAll('.wheel-char').forEach(c => c.classList.remove('final-highlight'));
+  }, 3500);
+}
+
+// ================================================================
+// 13. 金文铭刻浮现
+// ================================================================
+function showJinwenInscription(text) {
+  const el = document.getElementById('jinwenInscription');
+  if (!el) return;
+  // 移除之前的
+  el.classList.remove('jinwen-inscription');
+  el.textContent = '';
+  void el.offsetWidth;
+  // 重新触发动画
+  el.className = 'jinwen-inscription';
+  el.textContent = text;
+  // 3秒后自动清理
+  setTimeout(() => {
+    el.textContent = '';
+    el.className = '';
+  }, 3200);
+}
+
+// ================================================================
+// 14. 阴阳鱼游动
+// ================================================================
+function activateYinYangFish() {
+  const container = document.getElementById('yinYangFish');
+  if (container) container.classList.add('active');
+}
+function deactivateYinYangFish() {
+  const container = document.getElementById('yinYangFish');
+  if (container) container.classList.remove('active');
+}
+
+// ================================================================
+// 15. 龟甲裂纹光效
+// ================================================================
+function spawnTortoiseCrack(yaoResults) {
+  const overlay = document.getElementById('tortoiseCrack');
+  const svg = document.getElementById('crackSvg');
+  if (!overlay || !svg) return;
+
+  overlay.classList.remove('active');
+  svg.innerHTML = '';
+  void overlay.offsetWidth;
+  overlay.classList.add('active');
+
+  const w = 1920, h = 1080;
+  const cx = w / 2, cy = h / 2;
+
+  // 生成裂纹：从中心向六爻方向延伸
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      // 六条主裂纹，从中心向不同方向
+      const baseAngle = -Math.PI / 3 + (i * Math.PI / 4);
+      const endX = cx + Math.cos(baseAngle) * (300 + Math.random() * 400);
+      const endY = cy + Math.sin(baseAngle) * (250 + Math.random() * 300);
+
+      // 主裂纹
+      const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const midX1 = cx + Math.cos(baseAngle + 0.3) * 120;
+      const midY1 = cy + Math.sin(baseAngle + 0.3) * 100;
+      path1.setAttribute('d', `M${cx},${cy} Q${midX1},${midY1} ${endX},${endY}`);
+      path1.setAttribute('class', 'crack-line');
+      path1.style.animationDelay = `${i * 0.15}s`;
+
+      // 分叉裂纹
+      const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const branchStartX = cx + Math.cos(baseAngle) * 160;
+      const branchStartY = cy + Math.sin(baseAngle) * 130;
+      const branchEndX = branchStartX + Math.cos(baseAngle + 0.7) * 180;
+      const branchEndY = branchStartY + Math.sin(baseAngle + 0.7) * 160;
+      path2.setAttribute('d', `M${branchStartX},${branchStartY} Q${branchStartX + 50},${branchStartY - 30} ${branchEndX},${branchEndY}`);
+      path2.setAttribute('class', 'crack-line');
+      path2.style.animationDelay = `${i * 0.15 + 0.3}s`;
+
+      svg.appendChild(path1);
+      svg.appendChild(path2);
+    }, i * 200);
+  }
+
+  // 3秒后隐藏
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    svg.innerHTML = '';
+  }, 3500);
+}
+
+// ================================================================
+// 16. 星河倒悬瀑布
+// ================================================================
+let starfallInterval = null;
+function startStarfall() {
+  const container = document.getElementById('starfallContainer');
+  if (!container) return;
+  container.classList.add('active');
+  container.innerHTML = '';
+
+  starfallInterval = setInterval(() => {
+    const particle = document.createElement('div');
+    particle.className = 'starfall-particle';
+    const left = Math.random() * 100;
+    const size = 1 + Math.random() * 3;
+    const dur = 2 + Math.random() * 4;
+    const delay = Math.random() * 0.5;
+    particle.style.cssText = `
+      left: ${left}%;
+      width: ${size}px; height: ${size}px;
+      animation-duration: ${dur}s;
+      animation-delay: ${delay}s;
+      opacity: ${0.3 + Math.random() * 0.7};
+    `;
+    container.appendChild(particle);
+    // 清理
+    setTimeout(() => { if (particle.parentNode) particle.remove(); }, (dur + delay) * 1000 + 100);
+  }, 80);
+}
+function stopStarfall() {
+  if (starfallInterval) { clearInterval(starfallInterval); starfallInterval = null; }
+  const container = document.getElementById('starfallContainer');
+  if (container) { container.classList.remove('active'); container.innerHTML = ''; }
+}
+
+// ================================================================
+// 17. 五行光环脉冲
+// ================================================================
+function pulseWuxingRings() {
+  const container = document.getElementById('wuxingRings');
+  if (!container) return;
+  container.classList.remove('active');
+  container.innerHTML = '';
+  void container.offsetWidth;
+
+  const colors = [
+    { name: '金', color: 'rgba(200,168,76,0.6)' },
+    { name: '木', color: 'rgba(90,138,106,0.6)' },
+    { name: '水', color: 'rgba(80,120,180,0.6)' },
+    { name: '火', color: 'rgba(192,57,43,0.6)' },
+    { name: '土', color: 'rgba(139,125,90,0.6)' }
+  ];
+
+  colors.forEach((c, i) => {
+    const ring = document.createElement('div');
+    ring.className = 'wuxing-ring';
+    ring.style.cssText = `
+      border-color: ${c.color};
+      animation-delay: ${i * 0.3}s;
+      box-shadow: 0 0 15px ${c.color.replace('0.6','0.2')}, inset 0 0 15px ${c.color.replace('0.6','0.1')};
+    `;
+    container.appendChild(ring);
+  });
+
+  container.classList.add('active');
+
+  // 3秒后清理
+  setTimeout(() => {
+    container.classList.remove('active');
+    container.innerHTML = '';
+  }, 3200);
+}
+
+// ================================================================
+// 18. 卦辞竹简展开
+// ================================================================
+function revealBambooScrolls(texts) {
+  const left = document.getElementById('bambooLeft');
+  const right = document.getElementById('bambooRight');
+  if (!left || !right) return;
+
+  left.innerHTML = '';
+  right.innerHTML = '';
+  left.classList.remove('active');
+  right.classList.remove('active');
+  void left.offsetWidth;
+
+  // 左侧竹简：卦名大字
+  for (let i = 0; i < 6; i++) {
+    const slip = document.createElement('div');
+    slip.className = 'bamboo-slip';
+    slip.style.setProperty('--slide-dir', '-100px');
+    slip.style.animationDelay = `${i * 0.12}s`;
+    slip.style.height = `${80 + Math.random() * 15}%`;
+    slip.textContent = texts.left || '';
+    left.appendChild(slip);
+  }
+
+  // 右侧竹简：卦辞竖排
+  const rightTexts = (texts.right || '').split('');
+  for (let i = 0; i < Math.min(rightTexts.length, 8); i++) {
+    const slip = document.createElement('div');
+    slip.className = 'bamboo-slip';
+    slip.style.setProperty('--slide-dir', '100px');
+    slip.style.animationDelay = `${i * 0.1}s`;
+    slip.style.height = `${75 + Math.random() * 20}%`;
+    slip.textContent = rightTexts[i];
+    right.appendChild(slip);
+  }
+
+  left.classList.add('active');
+  right.classList.add('active');
+
+  // 6秒后自动收起
+  setTimeout(() => {
+    left.classList.remove('active');
+    right.classList.remove('active');
+    left.innerHTML = '';
+    right.innerHTML = '';
+  }, 7000);
+}
+
+// ================================================================
+// 19. 八卦镜光柱冲天
+// ================================================================
+function shootLightPillar() {
+  // 主光柱
+  const pillar = document.createElement('div');
+  pillar.className = 'light-pillar';
+  document.body.appendChild(pillar);
+
+  // 环绕粒子
+  const pContainer = document.getElementById('pillarParticles');
+  if (!pContainer) { setTimeout(() => pillar.remove(), 2500); return; }
+  pContainer.innerHTML = '';
+
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'pillar-particle';
+      const left = 40 + Math.random() * 20;
+      const size = 2 + Math.random() * 4;
+      const dur = 1.5 + Math.random() * 2;
+      p.style.cssText = `
+        left: ${left}%;
+        bottom: ${Math.random() * 80}%;
+        width: ${size}px; height: ${size}px;
+        animation-duration: ${dur}s;
+        animation-delay: ${Math.random() * 0.3}s;
+      `;
+      pContainer.appendChild(p);
+      setTimeout(() => { if (p.parentNode) p.remove(); }, 3000);
+    }, i * 30);
+  }
+
+  // 2.5秒后清理光柱
+  setTimeout(() => {
+    pillar.remove();
+  }, 2500);
+}
+
+// ================================================================
+// 20. 时空涟漪波纹
+// ================================================================
+const RIPPLE_CHARS = ['道','德','元','亨','利','贞','天','地','乾','坤','太','极','阴','阳','易'];
+let rippleInterval = null;
+
+function activateRipples() {
+  const container = document.getElementById('rippleContainer');
+  if (!container) return;
+  container.classList.add('active');
+  container.innerHTML = '';
+
+  // 创建持续涟漪
+  const createRipple = () => {
+    const cx = 30 + Math.random() * 40;
+    const cy = 30 + Math.random() * 40;
+
+    const ring = document.createElement('div');
+    ring.className = 'ripple-ring';
+    ring.style.cssText = `
+      left: ${cx}%; top: ${cy}%;
+      animation-delay: ${Math.random() * 2}s;
+      animation-duration: ${3 + Math.random() * 3}s;
+    `;
+    container.appendChild(ring);
+    setTimeout(() => { if (ring.parentNode) ring.remove(); }, 6000);
+
+    // 涟漪文字
+    for (let i = 0; i < 3; i++) {
+      const char = document.createElement('span');
+      char.className = 'ripple-char';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 60 + Math.random() * 100;
+      const drx = Math.cos(angle) * dist;
+      const dry = Math.sin(angle) * dist;
+      char.style.cssText = `
+        left: ${cx}%; top: ${cy}%;
+        --drx: ${drx}px;
+        --dry: ${dry}px;
+        animation-delay: ${Math.random() * 1.5}s;
+        animation-duration: ${4 + Math.random() * 3}s;
+      `;
+      char.textContent = RIPPLE_CHARS[Math.floor(Math.random() * RIPPLE_CHARS.length)];
+      container.appendChild(char);
+      setTimeout(() => { if (char.parentNode) char.remove(); }, 7000);
+    }
+  };
+
+  createRipple();
+  rippleInterval = setInterval(createRipple, 2500);
+}
+
+function deactivateRipples() {
+  if (rippleInterval) { clearInterval(rippleInterval); rippleInterval = null; }
+  const container = document.getElementById('rippleContainer');
+  if (container) { container.classList.remove('active'); container.innerHTML = ''; }
+}
+
+// ================================================================
+// 5. 起卦完成烟花（Canvas）
+// ================================================================
+function launchFireworks() {
+  const canvas = document.getElementById('fireworkCanvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.classList.add('active');
+  const ctx = canvas.getContext('2d');
+
+  const particles = [];
+  const colors = ['#e8d38c','#c9a84c','#9b3020','#f0ead8','#8b7d5a','#a89868','#5a8a6a','#d4a854'];
+
+  function createBurst(x, y, count) {
+    const hue = colors[Math.floor(Math.random() * colors.length)];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 / count) * i + Math.random() * 0.3;
+      const speed = 2 + Math.random() * 5;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        life: 1, decay: 0.008 + Math.random() * 0.02,
+        color: hue,
+        size: 1.5 + Math.random() * 2.5
+      });
+    }
+  }
+
+  // 多波烟花
+  for (let w = 0; w < 3; w++) {
+    setTimeout(() => {
+      for (let b = 0; b < 3 + w; b++) {
+        const x = canvas.width * (0.1 + Math.random() * 0.8);
+        const y = canvas.height * (0.15 + Math.random() * 0.5);
+        createBurst(x, y, 40 + Math.floor(Math.random() * 30));
+      }
+    }, w * 500);
+  }
+
+  function draw() {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life;
+      ctx.fill();
+      // 光晕
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life * 0.2;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (particles.length > 0) {
+      requestAnimationFrame(draw);
+    } else {
+      canvas.classList.remove('active');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+// ===== 粒子爆发特效 =====
+function spawnBurst(centerX, centerY, count, color) {
+  const wrap = document.getElementById('baguaSpinnerWrap');
+  if (!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const cx = centerX !== undefined ? centerX : rect.width / 2;
+  const cy = centerY !== undefined ? centerY : rect.height / 2;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'burst-particle';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 80 + Math.random() * 180;
+    p.style.cssText = `
+      left: ${cx}px; top: ${cy}px;
+      width: ${2 + Math.random() * 4}px;
+      height: ${2 + Math.random() * 4}px;
+      border-radius: 50%;
+      background: ${color || 'var(--gold-light)'};
+      box-shadow: 0 0 ${4 + Math.random() * 8}px ${color || 'var(--gold-light)'};
+      --bx: ${Math.cos(angle) * dist}px;
+      --by: ${Math.sin(angle) * dist}px;
+      animation-duration: ${0.8 + Math.random() * 1.2}s;
+    `;
+    wrap.appendChild(p);
+    setTimeout(() => { if (p.parentNode) p.parentNode.removeChild(p); }, 1400);
+  }
+}
+
+// ===== 阵盘光环脉冲 =====
+function pulseRing() {
+  const ring = document.getElementById('diskRingOuter');
+  if (!ring) return;
+  ring.classList.remove('pulse-ring');
+  void ring.offsetWidth;
+  ring.classList.add('pulse-ring');
+}
+
+// ===== 太极能量场脉冲 =====
+function pulseAura() {
+  const aura = document.getElementById('taijiAura');
+  if (!aura) return;
+  aura.classList.remove('pulse');
+  void aura.offsetWidth;
+  aura.classList.add('pulse');
+}
+
+// ===== 激活粒子光环 =====
+function activateParticleRing() {
+  const ring = document.getElementById('particleRing');
+  if (!ring) return;
+  ring.classList.add('active');
+}
+
+// ===== 停用粒子光环 =====
+function deactivateParticleRing() {
+  const ring = document.getElementById('particleRing');
+  if (!ring) return;
+  ring.classList.remove('active');
 }
 
 // 页面加载时初始化
@@ -2676,9 +4702,13 @@ function animateBaguaSpin(yaoResult, yaoIndex) {
       yaoBig.style.color = yaoResult.yao === 1 ? '#f0ead8' : '#8a8070';
       if (yaoResult.changing) {
         yaoBig.style.textShadow = '0 0 30px #c9a84c, 0 0 60px #9b3020, 0 0 90px rgba(155,48,32,0.5)';
+        // 变爻粒子爆发
+        spawnBurst(null, null, 18, '#c9a84c');
       } else {
         yaoBig.style.textShadow = '0 0 20px rgba(200,168,76,0.6), 0 0 40px rgba(200,168,76,0.3)';
+        spawnBurst(null, null, 8, '#a89868');
       }
+      pulseRing();
       yaoLabel.textContent = yaoResult.type;
       if (targetGua && currentYaoArray.length >= 3) {
         const whichGua = yaoIndex <= 2 ? '下卦' : '上卦';
@@ -2832,6 +4862,35 @@ async function startCasting() {
   // 最后才显示 castingArea，避免 flicker
   document.getElementById('castingArea').classList.add('visible');
 
+  // 激活粒子光环和能量场
+  activateParticleRing();
+  pulseAura();
+
+  // 激活旋转地球
+  activateCrystalBall();
+
+  // 全屏星空漩涡
+  spawnStarVortex();
+
+  // 日月同辉光晕
+  activateSunMoon();
+
+  // 天干地支流水轮盘
+  initGanzhiFlowRing();
+  startGanzhiFlow();
+
+  // 阴阳鱼游动
+  activateYinYangFish();
+
+  // 五行光环脉冲（起卦开始时爆发一次）
+  pulseWuxingRings();
+
+  // 星河倒悬瀑布
+  startStarfall();
+
+  // 启动阵盘火焰拖尾
+  startDiskTrail();
+
   // 重置
   currentYaoArray = [];
   const disk = document.getElementById('baguaDisk');
@@ -2893,11 +4952,21 @@ async function startCasting() {
     linesProgress.appendChild(lineDiv);
     await sleep(200);
     lineDiv.classList.add('revealed');
+    // 能量柱特效
+    spawnEnergyBeam(lineDiv);
     if (result.changing) {
       lineDiv.querySelectorAll('.yao-segment').forEach(s => s.classList.add('changing'));
+      lineDiv.classList.add('changing-bolt-line');
+      // 爻变墨韵晕染
+      spawnInkBlot(lineDiv);
     }
+    // 每爻揭示时触发一次小型五行脉冲
+    if (i < 5) pulseWuxingRings();
     await sleep(400);
   }
+
+  // 六爻全揭示后，龟甲裂纹效果
+  spawnTortoiseCrack(yaoResults);
 
   // 完成
   if (currentMethod === 'shicao') {
@@ -2924,6 +4993,79 @@ async function startCasting() {
     finalBaguaRotation(yaoResults);
     await sleep(1800);
   }
+
+  // 六爻闪电连线动画
+  const lineItems = document.querySelectorAll('#linesProgress .line-item.revealed');
+  if (lineItems.length > 0) {
+    spawnLightningBetween(lineItems);
+    await sleep(600);
+  }
+
+  // 六爻翻转动画（变卦过渡）
+  const hasChanging = yaoResults.some(r => r.changing);
+  if (hasChanging) {
+    deactivateParticleRing();
+    stopDiskTrail();
+    await animateYaoFlip(yaoResults);
+  } else {
+    deactivateParticleRing();
+    stopDiskTrail();
+  }
+
+  // 水晶球揭示卦象
+  const benYaoForCrystal = yaoResults.map(r => r.yao);
+  const lowerKey = benYaoForCrystal.slice(0, 3).join('');
+  const upperKey = benYaoForCrystal.slice(3, 6).join('');
+  const lowerGuaForCrystal = getGuaKeyByYaoKey(lowerKey);
+  const upperGuaForCrystal = getGuaKeyByYaoKey(upperKey);
+  const lg = GUA_DATA[lowerGuaForCrystal] || {};
+  const ug = GUA_DATA[upperGuaForCrystal] || {};
+  const guaSymbol = (lg.symbol || '') + (ug.symbol || '');
+  revealCrystalGua(guaSymbol);
+
+  // 八卦镜光柱冲天
+  shootLightPillar();
+
+  // 金文铭刻浮现 — 卦名大字
+  const benGuaName = GUA64[benYaoForCrystal.join('')] ? GUA64[benYaoForCrystal.join('')].name : (lg.name || '') + (ug.name || '');
+  showJinwenInscription(benGuaName);
+
+  // 卦辞竹简展开
+  const benGuaData = GUA64[benYaoForCrystal.join('')];
+  const bambooText = benGuaData ? (benGuaData.tuan || benGuaData.interpret || '').replace(/[《》彖曰象曰文言曰：，。；、\s]/g, '').substring(0, 30) : '元亨利贞';
+  revealBambooScrolls({ left: benGuaName, right: bambooText });
+
+  // 时空涟漪激活
+  activateRipples();
+
+  // 获取本卦变卦key用于六十四卦轮盘（GUA64 key格式：6爻字符串）
+  const benGua64Key = benYaoForCrystal.join('');
+  let bianGua64Key = benGua64Key;
+  const changingIndices = [];
+  yaoResults.forEach((r, i) => { if (r.changing) changingIndices.push(i); });
+  if (changingIndices.length > 0) {
+    const bianYao = [...benYaoForCrystal];
+    changingIndices.forEach(i => { bianYao[i] = bianYao[i] === 1 ? 0 : 1; });
+    bianGua64Key = bianYao.join('');
+  }
+
+  // 六十四卦轮盘闪现
+  initGua64Wheel();
+  spinGua64Wheel(benGua64Key, bianGua64Key);
+
+  await sleep(800);
+
+  // 烟花！
+  launchFireworks();
+
+  // 天降符纸
+  launchTalismans(18);
+
+  // 停止天干地支流水
+  stopGanzhiFlow();
+
+  await sleep(300);
+
   showResult(yaoResults);
 }
 
@@ -2985,6 +5127,16 @@ function finalBaguaRotation(yaoResults) {
   yaoLabel.textContent = `${upperGua.name}上${lowerGua.name}下 · ${currentBaguaMode === 'xian-tian' ? '先天' : '后天'}方位`;
   yaoPop.classList.add('show');
 
+  // 阵盘震动 + 粒子爆发
+  setTimeout(() => {
+    disk.style.setProperty('--qy', desiredY + 'deg');
+    disk.classList.add('quaking');
+    setTimeout(() => disk.classList.remove('quaking'), 350);
+    spawnBurst(null, null, 50, '#e8d38c');
+    pulseRing();
+    pulseAura();
+  }, 600);
+
   setTimeout(() => {
     yaoPop.classList.remove('show');
     yaoBig.style.fontSize = '48px';
@@ -2993,6 +5145,89 @@ function finalBaguaRotation(yaoResults) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ==================== 六爻翻转动画（变卦过渡） ====================
+
+/**
+ * 逐爻翻转动画：展示本卦六爻逐个翻转变为变卦
+ * @param {object[]} yaoResults - 六爻结果数组
+ */
+async function animateYaoFlip(yaoResults) {
+  const changingLines = [];
+  yaoResults.forEach((r, i) => { if (r.changing) changingLines.push(i); });
+
+  // 没有变爻，跳过
+  if (changingLines.length === 0) return;
+
+  const overlay = document.getElementById('flipOverlay');
+  const stage = document.getElementById('yaoFlipStage');
+  if (!overlay || !stage) return;
+
+  // 显示覆盖层
+  overlay.classList.add('active');
+  stage.classList.add('active');
+  stage.innerHTML = '';
+
+  // 创建六爻元素
+  const items = [];
+  for (let i = 5; i >= 0; i--) {
+    const isYang = yaoResults[i].yao === 1;
+    const isChanging = yaoResults[i].changing;
+    const willBeYang = isChanging ? (yaoResults[i].yao === 0) : isYang;
+
+    const item = document.createElement('div');
+    item.className = 'yao-flip-item';
+
+    const inner = document.createElement('div');
+    inner.className = 'flip-inner';
+
+    const front = document.createElement('div');
+    front.className = 'flip-front';
+    if (!isYang) front.classList.add('yin-line');
+    if (isChanging) front.classList.add('changing-mark');
+
+    const back = document.createElement('div');
+    back.className = 'flip-back';
+    if (willBeYang) back.classList.add('yang-line');
+    if (isChanging) back.classList.add('changing-mark');
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    item.appendChild(inner);
+    stage.appendChild(item);
+
+    items.push({ item, isChanging, index: i });
+  }
+
+  // 逐爻显示
+  for (let i = 0; i < items.length; i++) {
+    await sleep(120);
+    items[i].item.classList.add('show');
+  }
+
+  await sleep(400);
+
+  // 变爻翻转（从上到下依次翻转）
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].isChanging) {
+      items[i].item.classList.add('flipping');
+      await sleep(450);
+    }
+  }
+
+  await sleep(600);
+
+  // 收尾
+  for (let i = items.length - 1; i >= 0; i--) {
+    await sleep(80);
+    items[i].item.classList.remove('show');
+  }
+
+  await sleep(300);
+  overlay.classList.remove('active');
+  stage.classList.remove('active');
+  stage.innerHTML = '';
 }
 
 // ==================== 六爻排盘引擎（纳甲·安世应·定六亲·装卦） ====================
@@ -3346,6 +5581,54 @@ function resetAll() {
   document.querySelectorAll('.gua-card-disk.highlight').forEach(n => {
     n.classList.remove('highlight');
   });
+
+  // 重置特效
+  deactivateParticleRing();
+  deactivateCrystalBall();
+  stopDiskTrail();
+  stopGanzhiFlow();
+  deactivateSunMoon();
+  deactivateYinYangFish();
+  stopStarfall();
+  deactivateRipples();
+  // 清理金文铭刻
+  const jinwen = document.getElementById('jinwenInscription');
+  if (jinwen) { jinwen.textContent = ''; jinwen.className = ''; }
+  // 清理龟甲裂纹
+  const crackOverlay = document.getElementById('tortoiseCrack');
+  const crackSvg = document.getElementById('crackSvg');
+  if (crackOverlay) crackOverlay.classList.remove('active');
+  if (crackSvg) crackSvg.innerHTML = '';
+  // 清理五行光环
+  const wuxingRings = document.getElementById('wuxingRings');
+  if (wuxingRings) { wuxingRings.classList.remove('active'); wuxingRings.innerHTML = ''; }
+  // 清理竹简
+  const bambooLeft = document.getElementById('bambooLeft');
+  const bambooRight = document.getElementById('bambooRight');
+  if (bambooLeft) { bambooLeft.classList.remove('active'); bambooLeft.innerHTML = ''; }
+  if (bambooRight) { bambooRight.classList.remove('active'); bambooRight.innerHTML = ''; }
+  // 清理光柱和粒子
+  document.querySelectorAll('.light-pillar').forEach(el => el.remove());
+  const pillarP = document.getElementById('pillarParticles');
+  if (pillarP) pillarP.innerHTML = '';
+  const aura = document.getElementById('taijiAura');
+  if (aura) aura.classList.remove('pulse');
+  const overlay = document.getElementById('flipOverlay');
+  const flipStage = document.getElementById('yaoFlipStage');
+  const starVortex = document.getElementById('starVortexOverlay');
+  const lightning = document.getElementById('lightningOverlay');
+  const fwCanvas = document.getElementById('fireworkCanvas');
+  const talismanContainer = document.getElementById('talismanContainer');
+  const gua64Wheel = document.getElementById('gua64Wheel');
+  if (overlay) overlay.classList.remove('active');
+  if (flipStage) { flipStage.classList.remove('active'); flipStage.innerHTML = ''; }
+  if (starVortex) { starVortex.classList.remove('active'); starVortex.innerHTML = ''; }
+  if (lightning) { lightning.classList.remove('active'); lightning.innerHTML = ''; }
+  if (fwCanvas) { fwCanvas.classList.remove('active'); const ctx = fwCanvas.getContext('2d'); ctx.clearRect(0, 0, fwCanvas.width, fwCanvas.height); }
+  if (talismanContainer) talismanContainer.innerHTML = '';
+  if (gua64Wheel) { gua64Wheel.classList.remove('spinning'); gua64Wheel.innerHTML = ''; }
+  // 清理所有能量柱和墨韵
+  document.querySelectorAll('.energy-beam, .ink-blot').forEach(el => el.remove());
 
   isCasting = false;
 }
